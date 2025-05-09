@@ -1,0 +1,162 @@
+# AI 对话助手 Pro (AI Chat Helper Pro) - Chrome 插件 .cursorrules
+
+# -----------------------------------------------------------------------------
+# 项目总体目标
+# -----------------------------------------------------------------------------
+# 开发一个 Chrome 插件，提升用户在 AI 聊天界面中的交互效率。
+# 核心功能：快速插入、管理（本地/远程）、同步和分享高质量的 Prompt。
+# 特色：多语言界面与 Prompt，Prompt 市场与模板。
+
+# -----------------------------------------------------------------------------
+# 预期项目结构 (Manifest V3)
+# -----------------------------------------------------------------------------
+# /
+# ├── manifest.json
+# ├── icons/
+# │   ├── icon16.png
+# │   ├── icon48.png
+# │   └── icon128.png
+# ├── popup/
+# │   ├── popup.html
+# │   ├── popup.css
+# │   └── popup.js       # (或 popup.tsx / popup.vue 如果使用框架)
+# ├── options/
+# │   ├── options.html
+# │   ├── options.css
+# │   └── options.js     # (或 options.tsx / options.vue)
+# ├── content_scripts/
+# │   ├── content.js
+# │   └── content.css    # (用于注入的UI元素样式)
+# ├── service_worker.js  # (替代 Manifest V2 的 background.js)
+# ├── js/ (或 lib/, utils/, src/components/ 等，根据框架调整)
+# │   ├── storage.js     # 本地和远程存储逻辑
+# │   ├── auth.js        # 用户认证逻辑 (登录、注册、OAuth)
+# │   ├── api.js         # 后端 API 交互 (市场、同步)
+# │   ├── promptUtils.js # Prompt 创建、编辑、模板处理、参数化
+# │   ├── i18n.js        # (可选) i18n 辅助函数
+# │   └── uiUtils.js     # (可选) 通用 UI 交互辅助函数
+# ├── _locales/
+# │   ├── en/
+# │   │   └── messages.json
+# │   ├── zh_CN/
+# │   │   └── messages.json
+# │   └── (其他语言...)/
+# │       └── messages.json
+# ├── assets/            # 其他静态资源 (如图片、字体)
+# └── README.md
+# └── (可选) package.json, webpack.config.js, tsconfig.json 等构建和类型定义文件
+
+# -----------------------------------------------------------------------------
+# 关键文件及其职责
+# -----------------------------------------------------------------------------
+
+# manifest.json:
+# - 声明插件名称、版本、描述、权限 (storage, identity, activeTab, contextMenus, commands, host_permissions for AI sites)。
+# - 定义 popup 页面、options 页面、service worker、content scripts。
+# - 配置图标、CSP (Content Security Policy)。
+# - 重点关注 `host_permissions` 以确保 content script 在目标 AI 聊天网站上运行。
+# - 声明 `commands` API 用于快捷键。
+
+# service_worker.js:
+# - 处理后台任务：用户认证状态检查、远程数据同步、监听 `chrome.storage.onChanged`。
+# - 处理 `chrome.runtime.onMessage`，用于 popup, content script, options 页面之间的通信。
+# - 管理 contextMenus API 的创建和事件处理。
+# - 处理远程 API 调用（通过 api.js）。
+
+# content_scripts/content.js:
+# - 注入到指定的 AI 聊天页面 (e.g., chat.openai.com, claude.ai, gemini.google.com)。
+# - 检测聊天输入框，并在此附近注入“快速插入 Prompt”按钮/图标。
+# - 监听快捷键（通过 `chrome.commands` 或直接键盘事件）。
+# - 显示 Prompt 选择/搜索界面（可以是注入的 iframe 或原生 DOM 元素）。
+# - 将选择的 Prompt 插入到聊天输入框。
+# - 实现“一键保存当前输入为 Prompt”功能。
+# - 与 service_worker 通信获取/保存 Prompts。
+
+# popup/popup.html & popup.js:
+# - 插件的主要用户界面，通过点击浏览器工具栏图标打开。
+# - 展示用户个人 Prompt 列表（搜索、筛选、排序）。
+# - 提供创建、编辑、删除个人 Prompt 的界面。
+# - 访问 Prompt 市场（浏览、搜索、导入）。
+# - 用户登录/注册/登出入口。
+# - 访问插件设置（链接到 options 页面）。
+# - 管理 Prompt 收藏、分类/文件夹。
+
+# options/options.html & options.js:
+# - 插件设置页面。
+# - 界面语言切换。
+# - 用户账户管理（详细信息、修改密码等）。
+# - Prompt 导入/导出功能 (JSON/CSV)。
+# - （可选）暗黑/浅色模式切换。
+# - （可选）自定义快捷键设置。
+
+# js/storage.js:
+# - 封装 `chrome.storage.local` (或 IndexedDB) 的使用，用于本地存储 Prompts 和用户偏好。
+# - 实现与远程后端的数据同步逻辑（获取、推送、冲突解决）。
+# - 包含 Prompt 数据的 CRUD (Create, Read, Update, Delete) 操作。
+# - 管理 Prompt 版本历史（如果实现）。
+
+# js/auth.js:
+# - 处理用户认证：邮箱/密码注册和登录。
+# - 实现 OAuth 登录 (Google, GitHub) 使用 `chrome.identity` API。
+# - 管理用户 session/token。
+# - 与 service_worker 和 api.js 协作。
+
+# js/api.js:
+# - 封装所有与远程服务器的 HTTP 请求 (fetch API)。
+# - 用于 Prompt 同步、Prompt 市场数据获取/提交、用户账户操作等。
+# - 处理 API 响应和错误。
+
+# js/promptUtils.js:
+# - 提供 Prompt 模板解析和参数化功能 (e.g., `{{variable}}` 替换)。
+# - 辅助 Prompt 数据的格式化、校验。
+# - （可选）智能上下文推荐的初步逻辑。
+
+# _locales/*/messages.json:
+# - 存储不同语言的界面字符串。
+# - 使用 `chrome.i18n.getMessage("messageName")` 在 JS 和 HTML (`__MSG_messageName__`) 中引用。
+
+# -----------------------------------------------------------------------------
+# 核心逻辑和功能映射
+# -----------------------------------------------------------------------------
+# 1. 快速 Prompt 插入: `content.js` (UI注入, 触发), `popup.js` (选择界面), `promptUtils.js` (插入逻辑), `service_worker.js` (数据中介)
+# 2. Prompt 本地存储: `storage.js` (using `chrome.storage.local` or `IndexedDB`)
+# 3. Prompt 远程存储与同步: `auth.js` (登录), `api.js` (网络请求), `storage.js` (同步逻辑), `service_worker.js` (后台同步任务)
+# 4. 多语言界面: `_locales/` 目录, `chrome.i18n` API usage across `popup.js`, `options.js`, `content.js`.
+# 5. 多语言 Prompt 支持: Prompt 对象中应有 `language` 字段, `storage.js` 和 UI (popup.js) 需处理。
+# 6. Prompt 分享市场: `popup.js` (UI), `api.js` (获取/提交市场数据), `storage.js` (导入到个人库)。
+# 7. Prompt 模板与参数化: `promptUtils.js` (模板处理), `content.js` / `popup.js` (参数输入UI)。
+# 8. Prompt 组织 (文件夹/收藏): `storage.js` (数据结构), `popup.js` (UI)。
+# 9. 一键保存当前输入: `content.js` (触发), `storage.js` (保存)。
+# 10. 导入/导出: `options.js` (UI), `storage.js` (逻辑)。
+
+# -----------------------------------------------------------------------------
+# UI/UX 注意事项
+# -----------------------------------------------------------------------------
+# - 考虑使用现代 JS 框架 (React, Vue, Svelte) 或轻量级库 (Preact) 来构建 `popup` 和 `options` 页面，以简化开发和维护。如果使用框架，请指明。
+# - `content_script` 注入的 UI 应尽量轻量，避免与宿主页面样式冲突 (使用 Shadow DOM 或 iframe)。
+# - 响应式设计，确保在不同大小的 popup 窗口中表现良好。
+# - 清晰的加载状态、错误提示。
+# - 支持暗黑模式和浅色模式。
+
+# -----------------------------------------------------------------------------
+# 后端/BaaS 选择
+# -----------------------------------------------------------------------------
+# - 明确是使用 Firebase/Supabase 还是自建后端。
+# - 如果自建，需要定义 API 端点规范。
+
+# -----------------------------------------------------------------------------
+# 安全与隐私
+# -----------------------------------------------------------------------------
+# - 所有敏感数据（密码、API tokens）传输时必须使用 HTTPS。
+# - 用户 Prompts 存储在远程时，应考虑加密或至少有明确的隐私政策。
+# - 插件权限请求遵循最小权限原则。
+
+# -----------------------------------------------------------------------------
+# 一般性 AI 指导
+# -----------------------------------------------------------------------------
+# - 优先使用 Manifest V3 标准。
+# - 代码应模块化，职责分明。
+# - 添加适当的注释，特别是复杂逻辑部分。
+# - 遵循异步编程模式 (Promises, async/await)。
+# - 确保错误处理和用户反馈。
+# - 考虑代码可测试性。
