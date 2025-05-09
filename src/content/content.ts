@@ -1,462 +1,448 @@
-import '../styles/tailwind.css';
+import type { MarketplacePrompt } from '../types/prompt';
 
-console.log('Immersive Prompt Content Script Loaded!');
+// 监听DOM加载完成
+document.addEventListener('DOMContentLoaded', () => {
+  // 初始化UI
+  initializeUI();
+});
 
-// 导入或定义提示词类型接口
-interface MarketplacePrompt {
-  id: string;
-  title: string;
-  content: string;
-  description: string;
-  tags: string[];
-  language: string;
-  category: string;
-  author: string;
-  rating: number;
-  downloads: number;
-  createdAt: Date;
+// 如果DOMContentLoaded已经触发，直接初始化
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  initializeUI();
 }
 
-// 示例提示词数据
-const mockPrompts: MarketplacePrompt[] = [
-  {
-    id: "1",
-    title: "Advanced SEO Content Writer",
-    content:
-      "Write an SEO-optimized blog post about {{topic}} that targets the keyword {{keyword}}. Include an introduction, at least 3 subheadings, and a conclusion.",
-    description: "Creates SEO-friendly blog content with proper structure",
-    tags: ["writing", "seo", "blog"],
-    language: "en",
-    category: "Content Creation",
-    author: "seomaster",
-    rating: 4.8,
-    downloads: 1250,
-    createdAt: new Date(2023, 3, 15),
-  },
-  {
-    id: "2",
-    title: "代码审查助手专业版",
-    content:
-      "请帮我审查以下{{language}}代码，找出潜在的bug、性能问题和安全漏洞：\n\n```{{language}}\n{{code}}\n```",
-    description: "帮助审查代码，发现潜在问题，提供专业建议",
-    tags: ["coding", "review", "security"],
-    language: "zh",
-    category: "Development",
-    author: "codereviewer",
-    rating: 4.9,
-    downloads: 3200,
-    createdAt: new Date(2023, 2, 10),
-  },
-  {
-    id: "3",
-    title: "Meeting Summarizer Pro",
-    content:
-      "Summarize the following meeting transcript into key points, action items, and decisions made:\n\n{{transcript}}",
-    description: "Extracts important information from meeting transcripts with advanced NLP",
-    tags: ["productivity", "business", "summary"],
-    language: "en",
-    category: "Productivity",
-    author: "meetingmaster",
-    rating: 4.7,
-    downloads: 980,
-    createdAt: new Date(2023, 4, 5),
-  },
-];
-
-// 将页面内容包装在一个容器中
-function wrapPageContent() {
-  // 检查是否已经包装过
-  if (document.getElementById('immersive-page-content-wrapper')) {
-    return;
-  }
-
-  // 创建页面内容包装容器
-  const wrapper = document.createElement('div');
-  wrapper.id = 'immersive-page-content-wrapper';
-  wrapper.className = 'overflow-auto h-screen w-full';
-  wrapper.style.gridColumn = '1';
-  wrapper.style.minWidth = '0'; // 防止溢出
-
-  // 移动body的所有子元素到包装容器
-  // 先做一个拷贝以避免集合在迭代过程中变化
-  const childNodes = Array.from(document.body.childNodes);
+// 初始化UI
+function initializeUI() {
+  // 注入按钮到页面
+  injectMarketplaceButton();
   
-  childNodes.forEach(node => {
-    // 跳过我们的按钮和Marketplace容器
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      const elem = node as Element;
-      if (elem.id === 'immersive-prompt-btn' || 
-          elem.id === 'immersive-prompt-marketplace' ||
-          elem.id === 'immersive-page-content-wrapper') {
-        return;
-      }
-    }
-    wrapper.appendChild(node);
-  });
-
-  // 将包装容器添加到body
-  document.body.appendChild(wrapper);
-  
-  // 添加必要的body样式
-  document.body.style.margin = '0';
-  document.body.style.padding = '0';
-  document.body.style.width = '100%';
-  document.body.style.height = '100%';
-  document.body.style.overflow = 'hidden'; // 防止外部滚动
-  
-  return wrapper;
+  // 注入Tailwind CSS
+  injectTailwindCSS();
 }
 
-// 应用Grid布局
-function applyGridLayout(isOpen: boolean) {
-  if (isOpen) {
-    // 确保内容已包装
-    wrapPageContent();
-    
-    // 设置Grid布局
-    document.body.style.display = 'grid';
-    document.body.style.gridTemplateColumns = 'auto 420px';
-    document.body.style.height = '100vh';
-    document.body.style.width = '100vw';
-    document.body.style.transition = 'grid-template-columns 0.3s ease';
-    
-    // 重置任何可能的滚动位置
-    window.scrollTo(0, 0);
-  } else {
-    // 恢复正常布局
-    document.body.style.display = '';
-    document.body.style.gridTemplateColumns = '';
-    document.body.style.height = '';
-    document.body.style.width = '';
-    document.body.style.overflow = '';
-  }
+// 注入Tailwind CSS
+function injectTailwindCSS() {
+  const tailwindLink = document.createElement('link');
+  tailwindLink.rel = 'stylesheet';
+  tailwindLink.href = 'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css';
+  document.head.appendChild(tailwindLink);
 }
 
-function addOpenPromptButton() {
-  // 检查按钮是否已存在，避免重复添加
-  if (document.getElementById('immersive-prompt-btn')) {
-    return;
-  }
-
+// 注入Marketplace按钮
+function injectMarketplaceButton() {
+  // 创建按钮容器 - 不再依赖于找到textarea元素
+  const buttonContainer = document.createElement('div');
+  buttonContainer.className = 'fixed bottom-24 right-5 z-50';
+  buttonContainer.id = 'ai-prompt-marketplace-button';
+  
   // 创建按钮
   const button = document.createElement('button');
-  button.id = 'immersive-prompt-btn';
-  button.className = 'fixed w-[60px] h-[60px] right-[10px] top-1/2 -translate-y-1/2 bg-gray-800 text-white rounded-full flex items-center justify-center cursor-pointer z-[9999] p-0 text-[10px] transition-colors duration-300 shadow-sm hover:bg-gray-700 select-none';
-  
-  // 创建SVG图标 - IP的变形字
+  button.className = 'bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg transition-all';
   button.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-[30px] h-[30px] fill-white">
-      <path d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,16c-0.55,0-1-0.45-1-1 c0-0.55,0.45-1,1-1s1,0.45,1,1C13,15.55,12.55,16,12,16z M13,12h-2V7h2V12z"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+      <path d="M12 3v18"></path>
+      <path d="M3 12h18"></path>
     </svg>
   `;
-
-  // 创建 Marketplace 容器
-  const marketplaceContainer = document.createElement('div');
-  marketplaceContainer.id = 'immersive-prompt-marketplace';
-  marketplaceContainer.className = 'bg-white shadow-xl border-l border-gray-200 z-[9998] overflow-hidden flex flex-col font-sans text-gray-800';
-  marketplaceContainer.style.display = 'none';
-  marketplaceContainer.style.gridColumn = '2';
-  marketplaceContainer.style.height = '100vh';
-  marketplaceContainer.style.position = 'relative';
-  marketplaceContainer.style.top = '0';
-  marketplaceContainer.style.right = '0';
-  marketplaceContainer.style.transform = 'none';
+  button.title = 'Prompt 市场';
+  button.addEventListener('click', toggleMarketplaceUI);
   
-  // 创建关闭按钮
-  const closeButton = document.createElement('button');
-  closeButton.id = 'marketplace-close-btn';
-  closeButton.className = 'absolute top-[10px] right-[10px] w-6 h-6 rounded-full bg-gray-100 text-gray-800 border-none flex items-center justify-center text-lg cursor-pointer z-[10000] hover:bg-gray-200';
-  closeButton.innerHTML = '&times;';
-  closeButton.onclick = () => {
-    marketplaceContainer.style.display = 'none';
-    button.classList.remove('bg-gray-600');
-    button.classList.add('bg-gray-800');
-    applyGridLayout(false);
-    console.log('Marketplace UI closed');
-  };
+  // 将按钮添加到容器
+  buttonContainer.appendChild(button);
   
-  // 创建 Marketplace UI 结构
-  const marketplaceUI = document.createElement('div');
-  marketplaceUI.className = 'flex-1 flex flex-col overflow-hidden';
+  // 将容器添加到页面
+  document.body.appendChild(buttonContainer);
   
-  // 头部
-  const header = document.createElement('header');
-  header.className = 'p-4 border-b border-gray-200';
-  header.innerHTML = `
-    <h1 class="m-0 mb-4 text-lg font-semibold">Prompt Marketplace</h1>
-    <div class="mb-3">
-      <input type="text" id="prompt-search" placeholder="Search marketplace..." class="w-full p-2 border border-gray-200 rounded text-sm">
-    </div>
-    <div class="flex gap-2">
-      <select id="category-filter" class="flex-1 py-1.5 px-2 border border-gray-200 rounded text-sm bg-white">
-        <option value="all">All Categories</option>
-        <option value="Content Creation">Content Creation</option>
-        <option value="Development">Development</option>
-        <option value="Productivity">Productivity</option>
-      </select>
-      <select id="language-filter" class="flex-1 py-1.5 px-2 border border-gray-200 rounded text-sm bg-white">
-        <option value="all">All Languages</option>
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-      </select>
-    </div>
+  // 设置样式确保按钮始终可见
+  const style = document.createElement('style');
+  style.textContent = `
+    #ai-prompt-marketplace-button {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      z-index: 10000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
   `;
+  document.head.appendChild(style);
   
-  // 标签页
-  const tabs = document.createElement('div');
-  tabs.className = 'px-4 border-b border-gray-200';
-  tabs.innerHTML = `
-    <div class="flex gap-2">
-      <button class="tab-button py-2 px-4 bg-transparent border-0 border-b-2 border-transparent cursor-pointer text-sm text-gray-500 active:text-blue-500 active:border-blue-500 active:font-medium" data-tab="popular">Popular</button>
-      <button class="tab-button py-2 px-4 bg-transparent border-0 border-b-2 border-transparent cursor-pointer text-sm text-gray-500" data-tab="recent">Recent</button>
-      <button class="tab-button py-2 px-4 bg-transparent border-0 border-b-2 border-transparent cursor-pointer text-sm text-gray-500" data-tab="top-rated">Top Rated</button>
-    </div>
-  `;
-  
-  // 内容区域
-  const content = document.createElement('div');
-  content.className = 'flex-1 overflow-y-auto p-4';
-  content.id = 'marketplace-prompts';
-  
-  // 添加提示词卡片
-  populatePrompts(content, mockPrompts);
-  
-  // 组装 UI
-  marketplaceUI.appendChild(header);
-  marketplaceUI.appendChild(tabs);
-  marketplaceUI.appendChild(content);
-  
-  marketplaceContainer.appendChild(closeButton);
-  marketplaceContainer.appendChild(marketplaceUI);
-  
-  // 添加事件处理
-  const searchInput = marketplaceUI.querySelector('#prompt-search') as HTMLInputElement;
-  const categoryFilter = marketplaceUI.querySelector('#category-filter') as HTMLSelectElement;
-  const languageFilter = marketplaceUI.querySelector('#language-filter') as HTMLSelectElement;
-  const tabButtons = marketplaceUI.querySelectorAll('.tab-button');
-  
-  // 搜索和过滤功能
-  function filterPrompts() {
-    const searchQuery = searchInput.value.toLowerCase();
-    const category = categoryFilter.value;
-    const language = languageFilter.value;
-    const activeTab = marketplaceUI.querySelector('.tab-button.active')?.getAttribute('data-tab') || 'popular';
-    
-    let filtered = [...mockPrompts];
-    
-    // 搜索过滤
-    if (searchQuery) {
-      filtered = filtered.filter(prompt => 
-        prompt.title.toLowerCase().includes(searchQuery) ||
-        prompt.description.toLowerCase().includes(searchQuery) ||
-        prompt.tags.some(tag => tag.toLowerCase().includes(searchQuery))
-      );
-    }
-    
-    // 分类过滤
-    if (category !== 'all') {
-      filtered = filtered.filter(prompt => prompt.category === category);
-    }
-    
-    // 语言过滤
-    if (language !== 'all') {
-      filtered = filtered.filter(prompt => prompt.language === language);
-    }
-    
-    // 排序
-    if (activeTab === 'popular') {
-      filtered.sort((a, b) => b.downloads - a.downloads);
-    } else if (activeTab === 'recent') {
-      filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    } else if (activeTab === 'top-rated') {
-      filtered.sort((a, b) => b.rating - a.rating);
-    }
-    
-    // 更新 UI
-    populatePrompts(content, filtered);
-  }
-  
-  searchInput.addEventListener('input', filterPrompts);
-  categoryFilter.addEventListener('change', filterPrompts);
-  languageFilter.addEventListener('change', filterPrompts);
-  
-  // 标签页切换
-  tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      tabButtons.forEach(btn => {
-        btn.classList.remove('active');
-        btn.classList.remove('text-blue-500');
-        btn.classList.remove('border-blue-500');
-        btn.classList.remove('font-medium');
-      });
-      button.classList.add('active');
-      button.classList.add('text-blue-500');
-      button.classList.add('border-blue-500');
-      button.classList.add('font-medium');
-      filterPrompts();
-    });
-  });
-  
-  // 设置第一个标签为激活状态
-  const firstTabButton = tabButtons[0];
-  if (firstTabButton) {
-    firstTabButton.classList.add('active');
-    firstTabButton.classList.add('text-blue-500');
-    firstTabButton.classList.add('border-blue-500');
-    firstTabButton.classList.add('font-medium');
-  }
-
-  // UI状态标志
-  let isUIOpen = false;
-
-  // 按钮点击事件处理
-  button.onclick = (e) => {
-    // 防止拖动结束时触发点击
-    if (isDragging) {
-      e.stopPropagation();
-      isDragging = false;
-      return;
-    }
-    
-    isUIOpen = !isUIOpen; // 切换状态
-    
-    if (isUIOpen) {
-      // 打开UI
-      marketplaceContainer.style.display = 'block';
-      button.classList.remove('bg-gray-800');
-      button.classList.add('bg-gray-600');
-      
-      // 应用Grid布局
-      applyGridLayout(true);
-      
-      console.log('Marketplace UI opened');
-    } else {
-      // 关闭UI
-      marketplaceContainer.style.display = 'none';
-      button.classList.remove('bg-gray-600');
-      button.classList.add('bg-gray-800');
-      
-      // 恢复正常布局
-      applyGridLayout(false);
-      
-      console.log('Marketplace UI closed');
-    }
-  };
-
-  // 添加拖动功能
-  let isDragging = false;
-  let offsetY = 0;
-  
-  const onMouseDown = (e: MouseEvent) => {
-    isDragging = true;
-    offsetY = e.clientY - button.getBoundingClientRect().top;
-    
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    
-    // 防止默认行为和冒泡
-    e.preventDefault();
-    e.stopPropagation();
-  };
-  
-  const onMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
-    
-    // 只计算Y轴位置
-    const y = e.clientY - offsetY;
-    
-    // 设置按钮位置，保持固定在右侧
-    button.style.top = `${y}px`;
-    button.style.transform = 'translateY(0)'; // 移除Y轴的transform
-    
-    e.preventDefault();
-  };
-  
-  const onMouseUp = () => {
-    isDragging = false;
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
-  };
-  
-  button.addEventListener('mousedown', onMouseDown);
-
-  // 将按钮和面板添加到页面
-  document.body.appendChild(button);
-  document.body.appendChild(marketplaceContainer);
-  console.log('Open Prompt button and Marketplace UI added to page.');
+  console.log('Prompt市场按钮已注入到页面');
 }
 
-// 辅助函数：填充提示词列表
-function populatePrompts(container: HTMLElement, prompts: MarketplacePrompt[]) {
-  // 清空现有内容
+// 切换Marketplace UI显示
+function toggleMarketplaceUI() {
+  let marketplace = document.getElementById('ai-prompt-marketplace');
+  
+  if (marketplace) {
+    marketplace.remove();
+  } else {
+    createMarketplaceUI();
+  }
+}
+
+// 创建Marketplace UI
+function createMarketplaceUI() {
+  // 创建Marketplace容器
+  const marketplace = document.createElement('div');
+  marketplace.id = 'ai-prompt-marketplace';
+  marketplace.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col h-[600px] w-[400px] bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg shadow-2xl';
+  
+  // 添加标题栏
+  marketplace.innerHTML = `
+    <header class="p-4 border-b flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <button id="marketplace-back" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <h1 class="text-xl font-bold">Prompt 市场</h1>
+      </div>
+    </header>
+    
+    <div class="p-4 space-y-4">
+      <div class="relative">
+        <svg class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input id="marketplace-search" type="text" placeholder="搜索市场..." class="w-full pl-8 pr-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+      </div>
+      
+      <div class="flex gap-2">
+        <div class="relative inline-block w-1/2">
+          <select id="marketplace-category-filter" class="w-full h-9 pl-6 pr-8 border rounded-md appearance-none dark:bg-gray-700 dark:border-gray-600">
+            <option value="all">所有分类</option>
+            <option value="Content Creation">内容创作</option>
+            <option value="Development">开发</option>
+            <option value="Productivity">效率</option>
+            <option value="Education">教育</option>
+            <option value="Business">商业</option>
+            <option value="Creative">创意</option>
+          </select>
+          <svg class="absolute left-1.5 top-2.5 h-3.5 w-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        </div>
+        
+        <div class="relative inline-block w-1/2">
+          <select id="marketplace-language-filter" class="w-full h-9 pl-6 pr-8 border rounded-md appearance-none dark:bg-gray-700 dark:border-gray-600">
+            <option value="all">所有语言</option>
+            <option value="en">英语</option>
+            <option value="zh">中文</option>
+          </select>
+          <svg class="absolute left-1.5 top-2.5 h-3.5 w-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex-1 flex flex-col">
+      <div class="px-4">
+        <div class="flex w-full border-b">
+          <button id="tab-popular" class="flex-1 py-2 border-b-2 border-blue-500 font-medium">热门</button>
+          <button id="tab-recent" class="flex-1 py-2 border-b-0 text-gray-500">最新</button>
+          <button id="tab-top-rated" class="flex-1 py-2 border-b-0 text-gray-500">高分</button>
+        </div>
+      </div>
+      
+      <div id="prompts-container" class="flex-1 overflow-auto p-4">
+        <div id="prompts-grid" class="grid gap-3">
+          <!-- Prompts will be inserted here -->
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(marketplace);
+  
+  // 初始化事件监听
+  initMarketplaceEvents();
+  
+  // 加载提示数据
+  loadPromptData();
+}
+
+// 初始化Marketplace事件监听
+function initMarketplaceEvents() {
+  // 关闭按钮
+  document.getElementById('marketplace-back')?.addEventListener('click', toggleMarketplaceUI);
+  
+  // 搜索输入框
+  document.getElementById('marketplace-search')?.addEventListener('input', filterPrompts);
+  
+  // 分类过滤器
+  document.getElementById('marketplace-category-filter')?.addEventListener('change', filterPrompts);
+  
+  // 语言过滤器
+  document.getElementById('marketplace-language-filter')?.addEventListener('change', filterPrompts);
+  
+  // 标签切换
+  document.getElementById('tab-popular')?.addEventListener('click', () => switchTab('popular'));
+  document.getElementById('tab-recent')?.addEventListener('click', () => switchTab('recent'));
+  document.getElementById('tab-top-rated')?.addEventListener('click', () => switchTab('top-rated'));
+}
+
+// 切换标签
+function switchTab(tab: string) {
+  // 重置所有标签样式
+  const tabs = ['tab-popular', 'tab-recent', 'tab-top-rated'];
+  tabs.forEach(tabId => {
+    const tabElement = document.getElementById(tabId);
+    if (tabElement) {
+      tabElement.className = 'flex-1 py-2 border-b-0 text-gray-500';
+    }
+  });
+  
+  // 设置当前标签样式
+  const currentTab = document.getElementById(`tab-${tab}`);
+  if (currentTab) {
+    currentTab.className = 'flex-1 py-2 border-b-2 border-blue-500 font-medium';
+  }
+  
+  // 重新加载并排序数据
+  loadPromptData(tab);
+}
+
+// 加载Prompt数据
+function loadPromptData(sortBy: string = 'popular') {
+  const mockPrompts: MarketplacePrompt[] = [
+    {
+      id: "1",
+      title: "高级SEO内容创作器",
+      content:
+        "为{{topic}}写一篇针对关键词{{keyword}}的SEO优化博客文章。包括引言、至少3个小标题和结论。",
+      description: "创建具有适当结构的SEO友好博客内容",
+      tags: ["写作", "seo", "博客"],
+      language: "en",
+      category: "Content Creation",
+      author: "seomaster",
+      rating: 4.8,
+      downloads: 1250,
+      createdAt: new Date(2023, 3, 15),
+    },
+    {
+      id: "2",
+      title: "代码审查助手专业版",
+      content:
+        "请帮我审查以下{{language}}代码，找出潜在的bug、性能问题和安全漏洞：\n\n```{{language}}\n{{code}}\n```",
+      description: "帮助审查代码，发现潜在问题，提供专业建议",
+      tags: ["编程", "审查", "安全"],
+      language: "zh",
+      category: "Development",
+      author: "codereviewer",
+      rating: 4.9,
+      downloads: 3200,
+      createdAt: new Date(2023, 2, 10),
+    },
+    {
+      id: "3",
+      title: "会议总结专家",
+      content:
+        "将以下会议记录总结为要点、行动项目和已做决定：\n\n{{transcript}}",
+      description: "使用高级NLP从会议记录中提取重要信息",
+      tags: ["效率", "商业", "总结"],
+      language: "en",
+      category: "Productivity",
+      author: "meetingmaster",
+      rating: 4.7,
+      downloads: 980,
+      createdAt: new Date(2023, 4, 5),
+    },
+    {
+      id: "4",
+      title: "学习计划生成器高级版",
+      content:
+        "请为我创建一个为期{{duration}}的{{subject}}学习计划。我的目标是{{goal}}，我每周可以投入{{hours_per_week}}小时学习。",
+      description: "生成个性化学习计划，包含详细的学习资源和进度跟踪",
+      tags: ["教育", "计划", "学习"],
+      language: "zh",
+      category: "Education",
+      author: "eduexpert",
+      rating: 4.6,
+      downloads: 750,
+      createdAt: new Date(2023, 1, 20),
+    },
+    {
+      id: "5",
+      title: "电商产品描述生成器",
+      content:
+        "为{{product_name}}创建一个引人注目的产品描述，包含以下特点：{{features}}。目标受众：{{audience}}。包含SEO关键词：{{keywords}}。",
+      description: "为在线商店生成有说服力的产品描述",
+      tags: ["电商", "营销", "文案"],
+      language: "en",
+      category: "Business",
+      author: "ecomwriter",
+      rating: 4.5,
+      downloads: 2100,
+      createdAt: new Date(2023, 3, 25),
+    },
+    {
+      id: "6",
+      title: "创意故事生成器",
+      content:
+        "请以{{setting}}为背景，创作一个关于{{character}}的短篇故事。故事应包含以下元素：{{elements}}，并以{{tone}}的风格呈现。",
+      description: "生成创意短篇故事，可自定义背景、角色和风格",
+      tags: ["创意", "写作", "故事"],
+      language: "zh",
+      category: "Creative",
+      author: "storycrafter",
+      rating: 4.7,
+      downloads: 1800,
+      createdAt: new Date(2023, 2, 15),
+    },
+  ];
+
+  // 排序数据
+  let sortedPrompts = [...mockPrompts];
+  switch (sortBy) {
+    case 'popular':
+      sortedPrompts.sort((a, b) => b.downloads - a.downloads);
+      break;
+    case 'recent':
+      sortedPrompts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      break;
+    case 'top-rated':
+      sortedPrompts.sort((a, b) => b.rating - a.rating);
+      break;
+    default:
+      sortedPrompts.sort((a, b) => b.downloads - a.downloads);
+  }
+
+  renderPrompts(sortedPrompts);
+  filterPrompts();
+}
+
+// 渲染Prompts
+function renderPrompts(prompts: MarketplacePrompt[]) {
+  const container = document.getElementById('prompts-grid');
+  if (!container) return;
+  
   container.innerHTML = '';
   
-  if (prompts.length === 0) {
-    container.innerHTML = '<div class="text-center py-5 text-gray-500 text-sm">No prompts found matching your criteria.</div>';
-    return;
-  }
-  
-  // 为每个提示词创建卡片
   prompts.forEach(prompt => {
-    const card = document.createElement('div');
-    card.className = 'bg-white border border-gray-200 rounded-lg p-3 mb-3';
-    
-    // 格式化日期
-    const date = prompt.createdAt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-    
-    // 格式化标签
-    const tags = prompt.tags.map(tag => 
-      `<span class="text-xs py-0.5 px-1.5 rounded bg-gray-100 text-gray-600">${tag}</span>`
-    ).join('');
-    
-    // 填充卡片内容
-    card.innerHTML = `
-      <div class="flex justify-between mb-2">
-        <div>
-          <h3 class="text-base font-medium m-0 mb-1">${prompt.title}</h3>
-          <div class="flex items-center gap-1">
-            <span class="text-xs py-0.5 px-1.5 rounded bg-gray-100 text-gray-600">${prompt.category}</span>
-            <span class="text-xs py-0.5 px-1.5 rounded bg-blue-50 text-blue-800">${prompt.language === 'en' ? 'English' : '中文'}</span>
-          </div>
-        </div>
-        <div class="flex items-center gap-0.5 text-sm font-medium">
-          <span class="text-amber-500">★</span>
-          <span>${prompt.rating.toFixed(1)}</span>
-        </div>
-      </div>
-      <div class="text-sm text-gray-500 mb-2 line-clamp-2">${prompt.description}</div>
-      <div class="flex flex-wrap gap-1 mb-2">${tags}</div>
-      <div class="flex justify-between items-center">
-        <div class="text-xs text-gray-500">
-          <span class="font-medium">@${prompt.author}</span> · ${date}
-        </div>
-        <button class="bg-blue-500 text-white border-none rounded px-2.5 py-1.5 text-xs cursor-pointer flex items-center hover:bg-blue-600">
-          <svg class="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 16V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M5 21H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Import (${prompt.downloads})
-        </button>
-      </div>
-    `;
-    
-    // 添加导入功能
-    const importButton = card.querySelector('button');
-    if (importButton) {
-      importButton.addEventListener('click', () => {
-        console.log(`Importing prompt ${prompt.id}`);
-        // 这里实现实际的导入功能
-      });
-    }
-    
-    container.appendChild(card);
+    container.appendChild(createPromptCard(prompt));
   });
 }
 
-// 确保在 DOM 加载完成后执行
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', addOpenPromptButton);
-} else {
-  addOpenPromptButton();
+// 创建Prompt卡片
+function createPromptCard(prompt: MarketplacePrompt): HTMLElement {
+  const card = document.createElement('div');
+  card.className = 'w-full border rounded-lg shadow-sm overflow-hidden bg-white dark:bg-gray-700 dark:border-gray-600 flex flex-col';
+  
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  };
+  
+  card.innerHTML = `
+    <div class="pb-2 p-4">
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="text-base font-medium">${prompt.title}</h3>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="px-2 py-0.5 text-xs border rounded-full">${prompt.category}</span>
+            <span class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-600 rounded-full">${prompt.language === "en" ? "英语" : "中文"}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <svg class="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span class="text-sm font-medium">${prompt.rating.toFixed(1)}</span>
+        </div>
+      </div>
+    </div>
+    <div class="py-2 px-4">
+      <p class="text-sm text-gray-500 dark:text-gray-300 line-clamp-2">${prompt.description}</p>
+      <div class="mt-2 flex flex-wrap gap-1">
+        ${prompt.tags.map((tag: string) => `<span class="px-2 py-0.5 text-xs border rounded-full">${tag}</span>`).join('')}
+      </div>
+    </div>
+    <div class="pt-2 p-4 flex justify-between items-center border-t">
+      <div class="text-xs text-gray-500">
+        <span class="font-medium">@${prompt.author}</span> · ${formatDate(prompt.createdAt)}
+      </div>
+      <button class="import-prompt-btn px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center gap-1" data-prompt-id="${prompt.id}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        导入 (${prompt.downloads})
+      </button>
+    </div>
+  `;
+  
+  // 添加导入按钮点击事件
+  card.querySelector('.import-prompt-btn')?.addEventListener('click', (e) => {
+    const promptId = (e.currentTarget as HTMLElement).getAttribute('data-prompt-id');
+    if (promptId) {
+      importPrompt(promptId);
+    }
+  });
+  
+  return card;
+}
+
+// 导入Prompt
+function importPrompt(promptId: string) {
+  // 实际实现中，这里应该将prompt添加到用户的个人库中
+  console.log(`导入提示 ${promptId}`);
+  
+  // 模拟导入成功消息
+  showToast('提示已成功导入到您的个人库');
+}
+
+// 显示Toast消息
+function showToast(message: string) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-md z-50';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// 过滤Prompts
+function filterPrompts() {
+  const searchInput = document.getElementById('marketplace-search') as HTMLInputElement;
+  const categoryFilter = document.getElementById('marketplace-category-filter') as HTMLSelectElement;
+  const languageFilter = document.getElementById('marketplace-language-filter') as HTMLSelectElement;
+  
+  const searchQuery = searchInput?.value.toLowerCase() || '';
+  const categoryValue = categoryFilter?.value || 'all';
+  const languageValue = languageFilter?.value || 'all';
+  
+  // 获取当前激活的标签
+  const activeTab = document.querySelector('[id^="tab-"][class*="border-blue-500"]')?.id.replace('tab-', '') || 'popular';
+  
+  // 重新加载数据并应用过滤器
+  loadPromptData(activeTab);
+  
+  // 应用过滤器到DOM元素
+  const promptCards = document.querySelectorAll('#prompts-grid > div');
+  promptCards.forEach(card => {
+    const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+    const description = card.querySelector('p')?.textContent?.toLowerCase() || '';
+    const category = card.querySelector('.flex.items-center.gap-1.mt-1 > span:first-child')?.textContent || '';
+    const language = card.querySelector('.flex.items-center.gap-1.mt-1 > span:last-child')?.textContent === '中文' ? 'zh' : 'en';
+    const tags = Array.from(card.querySelectorAll('.mt-2.flex.flex-wrap.gap-1 > span')).map(tag => tag.textContent?.toLowerCase() || '');
+    
+    const matchesSearch = searchQuery === '' || 
+                          title.includes(searchQuery) || 
+                          description.includes(searchQuery) || 
+                          tags.some(tag => tag.includes(searchQuery));
+    
+    const matchesCategory = categoryValue === 'all' || category === categoryValue;
+    const matchesLanguage = languageValue === 'all' || language === languageValue;
+    
+    if (matchesSearch && matchesCategory && matchesLanguage) {
+      (card as HTMLElement).style.display = '';
+    } else {
+      (card as HTMLElement).style.display = 'none';
+    }
+  });
 }

@@ -35,7 +35,7 @@
         "*://aistudio.google.com/*"
       ],
       "js": ["js/content.js"],
-      "css": ["css/tailwind.css"]
+      "css": ["css/options.css"]
     }
   ]
 } 
