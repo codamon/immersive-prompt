@@ -1,5 +1,14 @@
 import type { MarketplacePrompt } from '../types/prompt';
 
+// Variable to store original styles
+let originalStyles: {
+  htmlOverflow?: string;
+  htmlHeight?: string;
+  bodyMarginRight?: string;
+  bodyOverflowY?: string;
+  bodyHeight?: string;
+} | null = null;
+
 // 监听DOM加载完成
 document.addEventListener('DOMContentLoaded', () => {
   // 初始化UI
@@ -73,11 +82,36 @@ function injectMarketplaceButton() {
 function toggleMarketplaceUI() {
   let marketplace = document.getElementById('ai-prompt-marketplace');
   
-  if (marketplace) {
+  if (marketplace) { // Is currently visible, so hide it
     marketplace.remove();
-    document.body.style.marginRight = '0px'; // Reset body margin when UI is hidden
-  } else {
-    createMarketplaceUI();
+    if (originalStyles) {
+      document.documentElement.style.overflow = originalStyles.htmlOverflow || "";
+      document.documentElement.style.height = originalStyles.htmlHeight || "";
+      document.body.style.marginRight = originalStyles.bodyMarginRight || "";
+      document.body.style.overflowY = originalStyles.bodyOverflowY || "";
+      document.body.style.height = originalStyles.bodyHeight || "";
+      originalStyles = null; // Clear stored styles
+    }
+  } else { // Is currently hidden, so show it
+    // Store original styles before making changes
+    const computedHtmlStyle = window.getComputedStyle(document.documentElement);
+    const computedBodyStyle = window.getComputedStyle(document.body);
+    originalStyles = {
+      htmlOverflow: computedHtmlStyle.overflow,
+      htmlHeight: computedHtmlStyle.height,
+      bodyMarginRight: computedBodyStyle.marginRight,
+      bodyOverflowY: computedBodyStyle.overflowY,
+      bodyHeight: computedBodyStyle.height,
+    };
+
+    createMarketplaceUI(); // This just creates and appends the element
+
+    // Now apply styles that make space and ensure scrollability
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.height = '100%';
+    document.body.style.marginRight = '400px';
+    document.body.style.height = '100%';
+    document.body.style.overflowY = 'auto';
   }
 }
 
@@ -140,7 +174,7 @@ function createMarketplaceUI() {
       </div>
     </div>
     
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-h-0">
       <div class="px-4">
         <div class="flex w-full border-b">
           <button id="tab-popular" class="flex-1 py-2 border-b-2 border-blue-500 font-medium">热门</button>
@@ -158,7 +192,6 @@ function createMarketplaceUI() {
   `;
   
   document.body.appendChild(marketplace);
-  document.body.style.marginRight = '400px'; // Adjust body margin to make space for the sidebar
   
   // 初始化事件监听
   initMarketplaceEvents();
