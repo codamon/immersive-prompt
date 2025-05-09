@@ -32,11 +32,10 @@
     {
       "matches": [
         "https://chat.openai.com/*",
-        "*://aistudio.google.com/*",
-        "https://gemini.google.com/*"
+        "*://aistudio.google.com/*"
       ],
       "js": ["js/content.js"],
-      "css": ["css/content_style.css"]
+      "css": ["css/tailwind.css"]
     }
   ]
 } 
