@@ -1,0 +1,50 @@
+{
+    "extensionName": {
+      "message": "AI 对话助手 Pro (MVP)",
+      "description": "扩展程序的名称。"
+    },
+    "extensionDescription": {
+      "message": "为 AI 聊天界面快速插入和管理您的提示词。",
+      "description": "扩展程序的描述。"
+    },
+    "optionsTitle": {
+      "message": "AI 对话助手 Pro 设置",
+      "description": "选项页面标题。"
+    },
+    "managePrompts": {
+      "message": "管理您的提示词",
+      "description": "管理提示词的区域标题。"
+    },
+    "promptTitleLabel": {
+      "message": "标题：",
+      "description": "提示词标题输入框标签。"
+    },
+    "promptContentLabel": {
+      "message": "内容：",
+      "description": "提示词内容输入框标签。"
+    },
+    "addPromptButton": {
+      "message": "添加提示词",
+      "description": "添加新提示词的按钮文本。"
+    },
+    "savePromptButton": {
+      "message": "保存提示词",
+      "description": "保存已编辑提示词的按钮文本。"
+    },
+    "editButton": {
+      "message": "编辑",
+      "description": "编辑提示词的按钮文本。"
+    },
+    "deleteButton": {
+      "message": "删除",
+      "description": "删除提示词的按钮文本。"
+    },
+    "noPrompts": {
+      "message": "还没有保存任何提示词。请在上方添加！",
+      "description": "提示词列表为空时的消息。"
+    },
+    "insertPromptIconTitle": {
+      "message": "插入提示词",
+      "description": "插入提示词图标的提示。"
+    }
+  }

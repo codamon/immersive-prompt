@@ -1,0 +1,17 @@
+<!-- src/options/options.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>__MSG_optionsPageTitle__</title> <!-- 或者直接写标题 -->
+    <!-- 如果 Options 页面有自己的 CSS，Vite 会在构建时注入链接 -->
+    <!-- 例如: <link rel="stylesheet" href="/css/options.css"> (路径由 Vite 生成) -->
+</head>
+<body>
+    <div id="root-options"></div>
+    <!-- 确保这里的 src 指向你为 Options 页面创建的入口 TSX 文件 -->
+    <!-- Vite 会处理这个 script 标签，并将其替换为构建后的 JS 文件路径 -->
+    <script type="module" src="./main-options.tsx"></script>
+</body>
+</html>

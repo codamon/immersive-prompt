@@ -1,0 +1,20 @@
+/* src/content/content_style.css */
+.immersive-prompt-button {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 9999; /* 确保按钮在顶层 */
+  font-family: sans-serif;
+  font-size: 14px;
+}
+
+.immersive-prompt-button:hover {
+  background-color: #0056b3;
+} 

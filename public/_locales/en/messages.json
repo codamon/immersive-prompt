@@ -1,0 +1,50 @@
+{
+    "extensionName": {
+      "message": "AI Chat Helper Pro (MVP)",
+      "description": "The name of the extension."
+    },
+    "extensionDescription": {
+      "message": "Quickly insert and manage your Prompts for AI chat interfaces.",
+      "description": "Description of the extension."
+    },
+    "optionsTitle": {
+      "message": "AI Chat Helper Pro Settings",
+      "description": "Title for the options page."
+    },
+    "managePrompts": {
+      "message": "Manage Your Prompts",
+      "description": "Section title for managing prompts."
+    },
+    "promptTitleLabel": {
+      "message": "Title:",
+      "description": "Label for prompt title input."
+    },
+    "promptContentLabel": {
+      "message": "Content:",
+      "description": "Label for prompt content input."
+    },
+    "addPromptButton": {
+      "message": "Add Prompt",
+      "description": "Button text to add a new prompt."
+    },
+    "savePromptButton": {
+      "message": "Save Prompt",
+      "description": "Button text to save an edited prompt."
+    },
+    "editButton": {
+      "message": "Edit",
+      "description": "Button text to edit a prompt."
+    },
+    "deleteButton": {
+      "message": "Delete",
+      "description": "Button text to delete a prompt."
+    },
+    "noPrompts": {
+      "message": "No prompts saved yet. Add one above!",
+      "description": "Message when prompt list is empty."
+    },
+    "insertPromptIconTitle": {
+      "message": "Insert Prompt",
+      "description": "Tooltip for the insert prompt icon."
+    }
+  }

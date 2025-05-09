@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Immersive Prompt</title>
+    <style>
+        /* Basic styling for the popup body to define its size */
+        html, body {
+            width: 300px; /* Adjust as needed */
+            height: 400px; /* Adjust as needed */
+            margin: 0;
+            font-family: sans-serif; /* Example font */
+        }
+        /* Ensure the root div takes up the full space */
+        #root-popup {
+            width: 100%;
+            height: 100%;
+            display: flex; /* Optional: for centering content or other layouts */
+            flex-direction: column; /* Optional */
+        }
+    </style>
+</head>
+<body>
+    <div id="root-popup"></div>
+    <script type="module" src="./main-popup.tsx"></script>
+</body>
+</html>
