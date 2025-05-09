@@ -75,6 +75,7 @@ function toggleMarketplaceUI() {
   
   if (marketplace) {
     marketplace.remove();
+    document.body.style.marginRight = '0px'; // Reset body margin when UI is hidden
   } else {
     createMarketplaceUI();
   }
@@ -85,7 +86,8 @@ function createMarketplaceUI() {
   // 创建Marketplace容器
   const marketplace = document.createElement('div');
   marketplace.id = 'ai-prompt-marketplace';
-  marketplace.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col h-[600px] w-[400px] bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg shadow-2xl';
+  marketplace.className = 'fixed top-0 right-0 h-screen w-[400px] flex flex-col bg-white dark:bg-gray-800 text-black dark:text-white shadow-xl';
+  marketplace.style.zIndex = '9999'; // Set a high z-index
   
   // 添加标题栏
   marketplace.innerHTML = `
@@ -156,6 +158,7 @@ function createMarketplaceUI() {
   `;
   
   document.body.appendChild(marketplace);
+  document.body.style.marginRight = '400px'; // Adjust body margin to make space for the sidebar
   
   // 初始化事件监听
   initMarketplaceEvents();
@@ -415,12 +418,6 @@ function filterPrompts() {
   const searchQuery = searchInput?.value.toLowerCase() || '';
   const categoryValue = categoryFilter?.value || 'all';
   const languageValue = languageFilter?.value || 'all';
-  
-  // 获取当前激活的标签
-  const activeTab = document.querySelector('[id^="tab-"][class*="border-blue-500"]')?.id.replace('tab-', '') || 'popular';
-  
-  // 重新加载数据并应用过滤器
-  loadPromptData(activeTab);
   
   // 应用过滤器到DOM元素
   const promptCards = document.querySelectorAll('#prompts-grid > div');
