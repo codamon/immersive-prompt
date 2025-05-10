@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Immersive Prompt Storage 测试</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+    }
+    h1, h2 {
+      margin-top: 0;
+      color: #1a237e;
+    }
+    button {
+      background: #3f51b5;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background: #303f9f;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow: auto;
+      max-height: 400px;
+    }
+    .output {
+      min-height: 200px;
+    }
+    .success {
+      color: #4caf50;
+    }
+    .error {
+      color: #f44336;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #121212;
+        color: #eee;
+      }
+      .card {
+        background: #1e1e1e;
+      }
+      pre {
+        background: #2a2a2a;
+        color: #ddd;
+      }
+      h1, h2 {
+        color: #7986cb;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Immersive Prompt Storage 测试</h1>
+      <p>本页面用于测试 Chrome Storage API 的实现和功能。在非 Chrome 插件环境中，会使用 localStorage 模拟 Chrome Storage API。</p>
+    </div>
+    
+    <div class="grid">
+      <div class="card">
+        <h2>添加示例提示</h2>
+        <div class="actions">
+          <button id="add-prompt">添加提示</button>
+          <button id="add-multiple">添加多个提示</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>查询提示</h2>
+        <div class="actions">
+          <button id="get-all-prompts">获取所有提示</button>
+          <button id="search-prompts">搜索写作相关</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>文件夹操作</h2>
+        <div class="actions">
+          <button id="create-folder">创建文件夹</button>
+          <button id="get-folders">获取所有文件夹</button>
+          <button id="organize-prompts">整理提示到文件夹</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>提示操作</h2>
+        <div class="actions">
+          <button id="use-prompt">使用提示</button>
+          <button id="favorite-prompt">收藏/取消收藏</button>
+          <button id="delete-prompt">删除提示</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>高级功能</h2>
+        <div class="actions">
+          <button id="export-data">导出数据</button>
+          <button id="import-data">导入数据</button>
+          <button id="clear-data">清除所有数据</button>
+          <button id="check-sync">检查同步状态</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>运行示例</h2>
+        <div class="actions">
+          <button id="run-examples">运行所有示例</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>输出结果</h2>
+      <pre id="output" class="output">准备就绪，点击任意操作按钮开始测试...</pre>
+    </div>
+  </div>
+
+  <!-- 引入Mock适配器，确保在非Chrome环境中也能运行 -->
+  <script type="module">
+    // 必须先导入Mock适配器
+    import enableMockChromeStorage from '../storage/mockChromeStorage.js';
+    enableMockChromeStorage();
+    
+    // 然后导入ChromeStorage和示例
+    import ChromeStorage from '../storage/chromeStorage.js';
+    import StorageExamples from '../storage/storageExample.js';
+    
+    // 辅助函数：格式化输出
+    function formatOutput(data) {
+      if (typeof data === 'object') {
+        return JSON.stringify(data, null, 2);
+      }
+      return String(data);
+    }
+    
+    // 辅助函数：清空输出
+    function clearOutput() {
+      document.getElementById('output').textContent = '';
+    }
+    
+    // 辅助函数：添加输出
+    function log(message, isError = false) {
+      const output = document.getElementById('output');
+      const div = document.createElement('div');
+      div.className = isError ? 'error' : '';
+      div.textContent = message;
+      output.appendChild(div);
+      console[isError ? 'error' : 'log'](message);
+    }
+    
+    // 辅助函数：添加JSON输出
+    function logJson(label, data) {
+      const output = document.getElementById('output');
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'success';
+      labelDiv.textContent = label;
+      output.appendChild(labelDiv);
+      
+      const jsonDiv = document.createElement('div');
+      jsonDiv.textContent = formatOutput(data);
+      output.appendChild(jsonDiv);
+      console.log(label, data);
+    }
+
+    // 按钮事件处理
+    document.getElementById('add-prompt').addEventListener('click', async () => {
+      clearOutput();
+      log('添加提示...');
+      try {
+        const prompt = await StorageExamples.addNewPrompt();
+        logJson('提示添加成功:', prompt);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('add-multiple').addEventListener('click', async () => {
+      clearOutput();
+      log('添加多个提示...');
+      try {
+        // 添加3个不同类型的提示
+        const prompt1 = await ChromeStorage.addPrompt({
+          title: "代码审查助手",
+          content: "请帮我审查以下{{language}}代码，找出潜在问题和优化点:\n\n```{{language}}\n{{code}}\n```",
+          description: "用于代码审查和优化的提示",
+          tags: ["编程", "代码", "审查"],
+          language: "zh",
+          category: "开发",
+          authorId: "local-user",
+          authorName: "本地用户",
+          rating: 0,
+          downloads: 0,
+          isFavorite: false,
+          source: "local",
+          status: "published",
+          lastUsedAt: null,
+          syncedAt: null,
+          remoteId: null
+        });
+        
+        const prompt2 = await ChromeStorage.addPrompt({
+          title: "会议总结生成器",
+          content: "请根据以下会议记录生成一份简洁的总结，包括讨论要点和行动项：\n\n{{meeting_notes}}",
+          description: "快速生成会议总结的提示",
+          tags: ["效率", "会议", "总结"],
+          language: "zh",
+          category: "效率",
+          authorId: "local-user",
+          authorName: "本地用户",
+          rating: 0,
+          downloads: 0,
+          isFavorite: true,
+          source: "local",
+          status: "published",
+          lastUsedAt: null,
+          syncedAt: null,
+          remoteId: null
+        });
+        
+        const prompt3 = await ChromeStorage.addPrompt({
+          title: "英语语法校对",
+          content: "Please check the following text for grammar and spelling errors, and suggest improvements:\n\n{{text}}",
+          description: "英语写作校对助手",
+          tags: ["英语", "写作", "校对"],
+          language: "en",
+          category: "教育",
+          authorId: "local-user",
+          authorName: "本地用户",
+          rating: 0,
+          downloads: 0,
+          isFavorite: false,
+          source: "local",
+          status: "draft",
+          lastUsedAt: null,
+          syncedAt: null,
+          remoteId: null
+        });
+        
+        logJson('多个提示添加成功:', {prompt1, prompt2, prompt3});
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('get-all-prompts').addEventListener('click', async () => {
+      clearOutput();
+      log('获取所有提示...');
+      try {
+        const prompts = await ChromeStorage.getPrompts();
+        logJson(`成功获取 ${prompts.length} 个提示:`, prompts);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('search-prompts').addEventListener('click', async () => {
+      clearOutput();
+      log('搜索写作相关提示...');
+      try {
+        const results = await ChromeStorage.searchPrompts('写作');
+        logJson(`找到 ${results.length} 个相关提示:`, results);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('create-folder').addEventListener('click', async () => {
+      clearOutput();
+      log('创建文件夹...');
+      try {
+        const folder = await ChromeStorage.addFolder({
+          name: "常用提示",
+          description: "经常使用的提示集合",
+          promptIds: [],
+          parentId: null,
+          icon: "star",
+          color: "#ff9800",
+          isExpanded: true,
+          position: 2
+        });
+        logJson('文件夹创建成功:', folder);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('get-folders').addEventListener('click', async () => {
+      clearOutput();
+      log('获取所有文件夹...');
+      try {
+        const folders = await ChromeStorage.getFolders();
+        logJson(`成功获取 ${folders.length} 个文件夹:`, folders);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('organize-prompts').addEventListener('click', async () => {
+      clearOutput();
+      log('整理提示到文件夹...');
+      try {
+        // 获取第一个非系统文件夹
+        const folders = await ChromeStorage.getFolders();
+        const customFolder = folders.find(f => f.id !== 'root' && f.id !== 'favorites');
+        
+        if (!customFolder) {
+          log('找不到自定义文件夹，请先创建一个文件夹');
+          return;
+        }
+        
+        // 获取所有提示
+        const prompts = await ChromeStorage.getPrompts();
+        if (prompts.length === 0) {
+          log('没有可用的提示，请先添加提示');
+          return;
+        }
+        
+        // 选择前2个提示放入文件夹
+        const promptIds = prompts.slice(0, 2).map(p => p.id);
+        
+        // 更新文件夹
+        const updatedFolder = await ChromeStorage.updateFolder(customFolder.id, {
+          promptIds: promptIds
+        });
+        
+        logJson('提示已整理到文件夹:', updatedFolder);
+        
+        // 获取文件夹内容
+        const folderPrompts = await ChromeStorage.getFolderPrompts(customFolder.id);
+        logJson('文件夹中的提示:', folderPrompts);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('use-prompt').addEventListener('click', async () => {
+      clearOutput();
+      log('使用提示...');
+      try {
+        const prompts = await ChromeStorage.getPrompts();
+        if (prompts.length === 0) {
+          log('没有可用的提示，请先添加提示');
+          return;
+        }
+        
+        const prompt = prompts[0];
+        logJson('使用前的提示:', prompt);
+        
+        const updatedPrompt = await ChromeStorage.usePrompt(prompt.id);
+        logJson('使用后的提示:', updatedPrompt);
+        
+        // 获取历史记录
+        const history = await ChromeStorage.getHistory(5);
+        logJson('最近的历史记录:', history);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('favorite-prompt').addEventListener('click', async () => {
+      clearOutput();
+      log('收藏/取消收藏提示...');
+      try {
+        const prompts = await ChromeStorage.getPrompts();
+        if (prompts.length === 0) {
+          log('没有可用的提示，请先添加提示');
+          return;
+        }
+        
+        const prompt = prompts[0];
+        logJson('修改前的提示:', prompt);
+        
+        const updatedPrompt = await ChromeStorage.updatePrompt(prompt.id, {
+          isFavorite: !prompt.isFavorite
+        });
+        
+        logJson('修改后的提示:', updatedPrompt);
+        
+        // 获取收藏夹内容
+        const favorites = await ChromeStorage.getFolderPrompts('favorites');
+        logJson('收藏夹中的提示:', favorites);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('delete-prompt').addEventListener('click', async () => {
+      clearOutput();
+      log('删除提示...');
+      try {
+        const prompts = await ChromeStorage.getPrompts();
+        if (prompts.length === 0) {
+          log('没有可用的提示，请先添加提示');
+          return;
+        }
+        
+        const prompt = prompts[prompts.length - 1]; // 删除最后一个
+        logJson('要删除的提示:', prompt);
+        
+        const result = await ChromeStorage.deletePrompt(prompt.id);
+        log(`提示删除${result ? '成功' : '失败'}`);
+        
+        // 再次获取所有提示
+        const remainingPrompts = await ChromeStorage.getPrompts();
+        logJson(`还剩 ${remainingPrompts.length} 个提示:`, remainingPrompts);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('export-data').addEventListener('click', async () => {
+      clearOutput();
+      log('导出数据...');
+      try {
+        const data = await ChromeStorage.exportData();
+        logJson('导出的数据 (前100字符):', data.substring(0, 100) + '...');
+        log(`导出的数据大小: ${data.length} 字节`);
+        
+        // 创建下载链接
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'immersive-prompt-data.json';
+        a.textContent = '下载导出的数据';
+        a.className = 'success';
+        document.getElementById('output').appendChild(a);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('import-data').addEventListener('click', async () => {
+      clearOutput();
+      log('导入数据...');
+      
+      // 复杂过程，暂时使用简单示例
+      try {
+        // 先导出当前数据
+        const data = await ChromeStorage.exportData();
+        log('已导出当前数据，现在将尝试导入它...');
+        
+        // 清除所有数据
+        await ChromeStorage.clearAll();
+        log('已清除所有数据');
+        
+        // 导入数据
+        const success = await ChromeStorage.importData(data);
+        log(`数据导入${success ? '成功' : '失败'}`);
+        
+        // 验证导入结果
+        const prompts = await ChromeStorage.getPrompts();
+        logJson('导入后的提示:', prompts);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('clear-data').addEventListener('click', async () => {
+      clearOutput();
+      log('清除所有数据...');
+      try {
+        await ChromeStorage.clearAll();
+        log('所有数据已清除');
+        
+        // 验证清除结果
+        const data = await ChromeStorage.getAll();
+        logJson('清除后的初始数据:', data);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('check-sync').addEventListener('click', async () => {
+      clearOutput();
+      log('检查同步状态...');
+      try {
+        const data = await ChromeStorage.getAll();
+        logJson('同步状态:', data.sync);
+        
+        // 更新同步状态
+        const updatedSettings = await ChromeStorage.updateSettings({
+          syncEnabled: !data.settings.syncEnabled
+        });
+        
+        logJson('更新后的设置:', updatedSettings);
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('run-examples').addEventListener('click', async () => {
+      clearOutput();
+      log('运行所有示例...');
+      try {
+        // 重定向控制台输出到页面
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        console.log = function(...args) {
+          log(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '));
+          originalConsoleLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+          log(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' '), true);
+          originalConsoleError.apply(console, args);
+        };
+        
+        await StorageExamples.runAllExamples();
+        
+        // 恢复控制台输出
+        console.log = originalConsoleLog;
+        console.error = originalConsoleError;
+      } catch (error) {
+        log(`错误: ${error.message}`, true);
+      }
+    });
+
+    // 初始信息
+    log('页面加载完成，存储系统已初始化。');
+  </script>
+</body>
+</html> 
