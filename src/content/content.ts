@@ -211,87 +211,65 @@ function createMarketplaceUI() {
   marketplace.innerHTML = `
     <header class="p-4 border-b flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <button id="marketplace-back" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <h1 class="text-xl font-bold">Immersive Prompt</h1>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="save-button" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="保存">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m15 18-6-6 6-6"/>
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
           </svg>
         </button>
-        <h1 class="text-xl font-bold">Prompt 市场</h1>
+        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="切换主题">
+          <span id="theme-toggle-icon">
+            ${isDarkMode ? `
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            ` : `
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            `}
+          </span>
+        </button>
+        <button id="settings-button" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="设置">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+          </svg>
+        </button>
       </div>
-      <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-        <span id="theme-toggle-icon">
-          ${isDarkMode ? `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          ` : `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-          `}
-        </span>
-      </button>
     </header>
     
     <div class="p-4 space-y-4">
       <div class="relative">
-        <svg class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
         </svg>
-        <input id="marketplace-search" type="text" placeholder="搜索市场..." class="w-full pl-8 pr-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+        <input id="prompt-search" type="text" placeholder="搜索提示..." class="search-input w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
       </div>
       
-      <div class="flex gap-2">
-        <div class="relative inline-block w-1/2">
-          <select id="marketplace-category-filter" class="w-full h-9 pl-6 pr-8 border rounded-md appearance-none dark:bg-gray-700 dark:border-gray-600">
-            <option value="all">所有分类</option>
-            <option value="Content Creation">内容创作</option>
-            <option value="Development">开发</option>
-            <option value="Productivity">效率</option>
-            <option value="Education">教育</option>
-            <option value="Business">商业</option>
-            <option value="Creative">创意</option>
-          </select>
-          <svg class="absolute left-1.5 top-2.5 h-3.5 w-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-          </svg>
-        </div>
-        
-        <div class="relative inline-block w-1/2">
-          <select id="marketplace-language-filter" class="w-full h-9 pl-6 pr-8 border rounded-md appearance-none dark:bg-gray-700 dark:border-gray-600">
-            <option value="all">所有语言</option>
-            <option value="en">英语</option>
-            <option value="zh">中文</option>
-          </select>
-          <svg class="absolute left-1.5 top-2.5 h-3.5 w-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-          </svg>
-        </div>
+      <div class="flex border-b border-gray-200 dark:border-gray-700">
+        <button id="tab-all" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2 active-tab">全部</button>
+        <button id="tab-favorites" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2">收藏</button>
+        <button id="tab-recent" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2">最近</button>
+        <button id="tab-popular" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2">热门</button>
       </div>
     </div>
     
-    <div class="flex-1 flex flex-col min-h-0">
-      <div class="px-4">
-        <div class="flex w-full border-b">
-          <button id="tab-popular" class="flex-1 py-2 border-b-2 border-blue-500 font-medium">热门</button>
-          <button id="tab-recent" class="flex-1 py-2 border-b-0 text-gray-500">最新</button>
-          <button id="tab-top-rated" class="flex-1 py-2 border-b-0 text-gray-500">高分</button>
-        </div>
-      </div>
-      
-      <div id="prompts-container" class="flex-1 overflow-auto p-4">
-        <div id="prompts-grid" class="grid gap-3">
-          <!-- Prompts will be inserted here -->
-        </div>
+    <div id="prompts-container" class="flex-1 overflow-y-auto p-4">
+      <div id="prompts-grid" class="grid grid-cols-1 gap-4">
+        <!-- 提示卡片将在这里动态插入 -->
       </div>
     </div>
   `;
@@ -418,39 +396,41 @@ function initMarketplaceEvents() {
   // 关闭按钮
   document.getElementById('marketplace-back')?.addEventListener('click', toggleMarketplaceUI);
   
+  // 市场链接按钮
+  document.getElementById('marketplace-link')?.addEventListener('click', () => {
+    // 触发显示市场页面
+    const event = new CustomEvent('showMarketplace');
+    document.dispatchEvent(event);
+  });
+  
   // 主题切换按钮
   document.getElementById('theme-toggle')?.addEventListener('click', toggleThemeMode);
   
   // 搜索输入框
-  document.getElementById('marketplace-search')?.addEventListener('input', filterPrompts);
-  
-  // 分类过滤器
-  document.getElementById('marketplace-category-filter')?.addEventListener('change', filterPrompts);
-  
-  // 语言过滤器
-  document.getElementById('marketplace-language-filter')?.addEventListener('change', filterPrompts);
+  document.getElementById('prompt-search')?.addEventListener('input', filterPrompts);
   
   // 标签切换
-  document.getElementById('tab-popular')?.addEventListener('click', () => switchTab('popular'));
+  document.getElementById('tab-all')?.addEventListener('click', () => switchTab('all'));
+  document.getElementById('tab-favorites')?.addEventListener('click', () => switchTab('favorites'));
   document.getElementById('tab-recent')?.addEventListener('click', () => switchTab('recent'));
-  document.getElementById('tab-top-rated')?.addEventListener('click', () => switchTab('top-rated'));
+  document.getElementById('tab-popular')?.addEventListener('click', () => switchTab('popular'));
 }
 
 // 切换标签
 function switchTab(tab: string) {
   // 重置所有标签样式
-  const tabs = ['tab-popular', 'tab-recent', 'tab-top-rated'];
+  const tabs = ['tab-all', 'tab-favorites', 'tab-recent', 'tab-popular'];
   tabs.forEach(tabId => {
     const tabElement = document.getElementById(tabId);
     if (tabElement) {
-      tabElement.className = 'flex-1 py-2 border-b-0 text-gray-500';
+      tabElement.className = 'tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2';
     }
   });
   
   // 设置当前标签样式
   const currentTab = document.getElementById(`tab-${tab}`);
   if (currentTab) {
-    currentTab.className = 'flex-1 py-2 border-b-2 border-blue-500 font-medium';
+    currentTab.className = 'tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2 active-tab';
   }
   
   // 重新加载并排序数据
@@ -735,21 +715,14 @@ function showToast(message: string) {
 
 // 过滤Prompts
 function filterPrompts() {
-  const searchInput = document.getElementById('marketplace-search') as HTMLInputElement;
-  const categoryFilter = document.getElementById('marketplace-category-filter') as HTMLSelectElement;
-  const languageFilter = document.getElementById('marketplace-language-filter') as HTMLSelectElement;
-  
+  const searchInput = document.getElementById('prompt-search') as HTMLInputElement;
   const searchQuery = searchInput?.value.toLowerCase() || '';
-  const categoryValue = categoryFilter?.value || 'all';
-  const languageValue = languageFilter?.value || 'all';
   
   // 应用过滤器到DOM元素
   const promptCards = document.querySelectorAll('#prompts-grid > div');
   promptCards.forEach(card => {
     const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
     const description = card.querySelector('p')?.textContent?.toLowerCase() || '';
-    const category = card.querySelector('.flex.items-center.gap-1.mt-1 > span:first-child')?.textContent || '';
-    const language = card.querySelector('.flex.items-center.gap-1.mt-1 > span:last-child')?.textContent === '中文' ? 'zh' : 'en';
     const tags = Array.from(card.querySelectorAll('.mt-2.flex.flex-wrap.gap-1 > span')).map(tag => tag.textContent?.toLowerCase() || '');
     
     const matchesSearch = searchQuery === '' || 
@@ -757,10 +730,7 @@ function filterPrompts() {
                           description.includes(searchQuery) || 
                           tags.some(tag => tag.includes(searchQuery));
     
-    const matchesCategory = categoryValue === 'all' || category === categoryValue;
-    const matchesLanguage = languageValue === 'all' || language === languageValue;
-    
-    if (matchesSearch && matchesCategory && matchesLanguage) {
+    if (matchesSearch) {
       (card as HTMLElement).style.display = '';
     } else {
       (card as HTMLElement).style.display = 'none';
