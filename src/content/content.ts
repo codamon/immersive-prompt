@@ -9,6 +9,9 @@ let originalStyles: {
   bodyHeight?: string;
 } | null = null;
 
+// 添加主题相关变量
+let isDarkMode = false;
+
 // 监听DOM加载完成
 document.addEventListener('DOMContentLoaded', () => {
   // 初始化UI
@@ -22,11 +25,92 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
 
 // 初始化UI
 function initializeUI() {
+  // 检测当前页面是否为暗黑模式
+  detectPageTheme();
+  
   // 注入按钮到页面
   injectMarketplaceButton();
   
   // 注入Tailwind CSS
   injectTailwindCSS();
+}
+
+// 检测页面主题
+function detectPageTheme() {
+  // 方法1：检查系统偏好
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    isDarkMode = true;
+  }
+  
+  // 方法2：检查页面元素和CSS变量
+  const bodyBgColor = window.getComputedStyle(document.body).backgroundColor;
+  const htmlEl = document.documentElement;
+  
+  // 检查常见的暗色背景颜色值或CSS类
+  if (
+    document.body.classList.contains('dark') || 
+    htmlEl.classList.contains('dark') ||
+    bodyBgColor === 'rgb(0, 0, 0)' || 
+    bodyBgColor === 'rgb(17, 17, 17)' || 
+    bodyBgColor === 'rgb(32, 33, 35)' || // ChatGPT暗色背景
+    bodyBgColor === 'rgb(52, 53, 65)' // Gemini暗色背景
+  ) {
+    isDarkMode = true;
+  }
+  
+  // 针对特定网站的检测（可根据需要增加）
+  if (
+    document.querySelector('.dark-theme') || 
+    document.querySelector('[data-theme="dark"]') || 
+    document.querySelector('[data-color-mode="dark"]')
+  ) {
+    isDarkMode = true;
+  }
+  
+  console.log('检测到的主题模式：', isDarkMode ? '暗黑模式' : '明亮模式');
+}
+
+// 切换主题模式
+function toggleThemeMode() {
+  isDarkMode = !isDarkMode;
+  
+  // 获取市场界面元素
+  const marketplace = document.getElementById('ai-prompt-marketplace');
+  if (marketplace) {
+    if (isDarkMode) {
+      marketplace.classList.add('dark-theme');
+      marketplace.classList.remove('light-theme');
+    } else {
+      marketplace.classList.add('light-theme');
+      marketplace.classList.remove('dark-theme');
+    }
+    
+    // 更新主题图标
+    const themeIcon = marketplace.querySelector('#theme-toggle-icon');
+    if (themeIcon) {
+      if (isDarkMode) {
+        themeIcon.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        `;
+      } else {
+        themeIcon.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        `;
+      }
+    }
+  }
 }
 
 // 注入Tailwind CSS
@@ -120,7 +204,7 @@ function createMarketplaceUI() {
   // 创建Marketplace容器
   const marketplace = document.createElement('div');
   marketplace.id = 'ai-prompt-marketplace';
-  marketplace.className = 'fixed top-0 right-0 h-screen w-[400px] flex flex-col bg-white dark:bg-gray-800 text-black dark:text-white shadow-xl';
+  marketplace.className = `fixed top-0 right-0 h-screen w-[400px] flex flex-col shadow-xl ${isDarkMode ? 'dark-theme' : 'light-theme'}`;
   marketplace.style.zIndex = '9999'; // Set a high z-index
   
   // 添加标题栏
@@ -134,6 +218,27 @@ function createMarketplaceUI() {
         </button>
         <h1 class="text-xl font-bold">Prompt 市场</h1>
       </div>
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <span id="theme-toggle-icon">
+          ${isDarkMode ? `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          ` : `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          `}
+        </span>
+      </button>
     </header>
     
     <div class="p-4 space-y-4">
@@ -193,6 +298,9 @@ function createMarketplaceUI() {
   
   document.body.appendChild(marketplace);
   
+  // 添加CSS样式
+  addThemeStyles();
+  
   // 初始化事件监听
   initMarketplaceEvents();
   
@@ -200,10 +308,118 @@ function createMarketplaceUI() {
   loadPromptData();
 }
 
+// 添加主题样式
+function addThemeStyles() {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    /* 明亮模式样式 */
+    #ai-prompt-marketplace.light-theme {
+      background-color: #ffffff;
+      color: #333333;
+    }
+    #ai-prompt-marketplace.light-theme header {
+      background-color: #f8f9fa;
+      border-color: #e9ecef;
+    }
+    #ai-prompt-marketplace.light-theme input, 
+    #ai-prompt-marketplace.light-theme select {
+      background-color: #ffffff;
+      border-color: #dee2e6;
+      color: #333333;
+    }
+    #ai-prompt-marketplace.light-theme button:not(.use-prompt-btn) {
+      color: #333333;
+    }
+    #ai-prompt-marketplace.light-theme .options-menu {
+      background-color: #ffffff;
+      border-color: #dee2e6;
+    }
+    
+    /* 卡片明亮模式 */
+    #ai-prompt-marketplace.light-theme .prompt-card {
+      background-color: #ffffff;
+      border-color: #e9ecef;
+      color: #333333;
+    }
+    #ai-prompt-marketplace.light-theme .prompt-description {
+      color: #555555;
+    }
+    #ai-prompt-marketplace.light-theme .tag-item {
+      background-color: #f8f9fa;
+      border-color: #e9ecef;
+      color: #666666;
+    }
+    #ai-prompt-marketplace.light-theme .favorite-prompt-btn,
+    #ai-prompt-marketplace.light-theme .more-options-btn {
+      color: #555555;
+    }
+    
+    /* 暗黑模式样式 */
+    #ai-prompt-marketplace.dark-theme {
+      background-color: #1e1e2e;
+      color: #e4e6eb;
+    }
+    #ai-prompt-marketplace.dark-theme header {
+      background-color: #252836;
+      border-color: #393a4d;
+    }
+    #ai-prompt-marketplace.dark-theme input, 
+    #ai-prompt-marketplace.dark-theme select {
+      background-color: #2e303e;
+      border-color: #393a4d;
+      color: #e4e6eb;
+    }
+    #ai-prompt-marketplace.dark-theme button:not(.use-prompt-btn) {
+      color: #e4e6eb;
+    }
+    #ai-prompt-marketplace.dark-theme .options-menu {
+      background-color: #2e303e;
+      border-color: #393a4d;
+    }
+    #ai-prompt-marketplace.dark-theme .text-gray-500 {
+      color: #a9adc1;
+    }
+    #ai-prompt-marketplace.dark-theme .text-gray-600 {
+      color: #cdd0e3;
+    }
+    
+    /* 卡片暗黑模式 */
+    #ai-prompt-marketplace.dark-theme .prompt-card {
+      background-color: #252836;
+      border-color: #393a4d;
+      color: #e4e6eb;
+    }
+    #ai-prompt-marketplace.dark-theme .prompt-description {
+      color: #cdd0e3;
+    }
+    #ai-prompt-marketplace.dark-theme .tag-item {
+      background-color: #2e303e;
+      border-color: #393a4d;
+      color: #b1b5d0;
+    }
+    #ai-prompt-marketplace.dark-theme .favorite-prompt-btn,
+    #ai-prompt-marketplace.dark-theme .more-options-btn {
+      color: #b1b5d0;
+    }
+    
+    /* 悬停效果 */
+    .prompt-card {
+      transition: transform 0.2s ease;
+    }
+    .prompt-card:hover {
+      transform: translateY(-2px);
+    }
+  `;
+  document.head.appendChild(styleElement);
+}
+
 // 初始化Marketplace事件监听
 function initMarketplaceEvents() {
   // 关闭按钮
   document.getElementById('marketplace-back')?.addEventListener('click', toggleMarketplaceUI);
+  
+  // 主题切换按钮
+  document.getElementById('theme-toggle')?.addEventListener('click', toggleThemeMode);
   
   // 搜索输入框
   document.getElementById('marketplace-search')?.addEventListener('input', filterPrompts);
@@ -241,9 +457,12 @@ function switchTab(tab: string) {
   loadPromptData(tab);
 }
 
-// 加载Prompt数据
+// 声明mockPrompts为一个全局变量，使其可以在其他函数中访问
+let mockPrompts: MarketplacePrompt[] = [];
+
+// 修改loadPromptData函数开头
 function loadPromptData(sortBy: string = 'popular') {
-  const mockPrompts: MarketplacePrompt[] = [
+  mockPrompts = [
     {
       id: "1",
       title: "高级SEO内容创作器",
@@ -365,69 +584,141 @@ function renderPrompts(prompts: MarketplacePrompt[]) {
 // 创建Prompt卡片
 function createPromptCard(prompt: MarketplacePrompt): HTMLElement {
   const card = document.createElement('div');
-  card.className = 'w-full border rounded-lg shadow-sm overflow-hidden bg-white dark:bg-gray-700 dark:border-gray-600 flex flex-col';
+  card.className = 'w-full border rounded-lg shadow-sm overflow-hidden prompt-card flex flex-col';
   
   const formatDate = (date: Date) => {
     return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   };
   
   card.innerHTML = `
-    <div class="pb-2 p-4">
+    <div class="p-4">
       <div class="flex justify-between items-start">
-        <div>
-          <h3 class="text-base font-medium">${prompt.title}</h3>
-          <div class="flex items-center gap-1 mt-1">
-            <span class="px-2 py-0.5 text-xs border rounded-full">${prompt.category}</span>
-            <span class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-600 rounded-full">${prompt.language === "en" ? "英语" : "中文"}</span>
+        <h3 class="text-base font-medium">${prompt.title}</h3>
+        <div class="flex items-center gap-2">
+          <button class="favorite-prompt-btn p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" data-prompt-id="${prompt.id}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </button>
+          <div class="relative">
+            <button class="more-options-btn p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" data-prompt-id="${prompt.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+            <div class="options-menu hidden absolute right-0 top-6 w-32 border rounded-md shadow-lg z-10">
+              <button class="edit-prompt-btn w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600" data-prompt-id="${prompt.id}">编辑</button>
+              <button class="delete-prompt-btn w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600" data-prompt-id="${prompt.id}">删除</button>
+            </div>
           </div>
         </div>
-        <div class="flex items-center gap-1">
-          <svg class="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
-          <span class="text-sm font-medium">${prompt.rating.toFixed(1)}</span>
-        </div>
       </div>
-    </div>
-    <div class="py-2 px-4">
-      <p class="text-sm text-gray-500 dark:text-gray-300 line-clamp-2">${prompt.description}</p>
+      
       <div class="mt-2 flex flex-wrap gap-1">
-        ${prompt.tags.map((tag: string) => `<span class="px-2 py-0.5 text-xs border rounded-full">${tag}</span>`).join('')}
+        ${prompt.tags.map((tag: string) => `<span class="px-2 py-0.5 text-xs border tag-item rounded-full">${tag}</span>`).join('')}
       </div>
-    </div>
-    <div class="pt-2 p-4 flex justify-between items-center border-t">
-      <div class="text-xs text-gray-500">
-        <span class="font-medium">@${prompt.author}</span> · ${formatDate(prompt.createdAt)}
+      
+      <p class="mt-3 text-sm prompt-description">${prompt.description}</p>
+      
+      <div class="mt-4 flex justify-between items-center">
+        <div class="text-xs text-gray-500">
+          <span class="font-medium">@${prompt.author}</span> · ${formatDate(prompt.createdAt)}
+        </div>
+        <button class="use-prompt-btn px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center gap-1" data-prompt-id="${prompt.id}">
+          Use
+        </button>
       </div>
-      <button class="import-prompt-btn px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center gap-1" data-prompt-id="${prompt.id}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        导入 (${prompt.downloads})
-      </button>
     </div>
   `;
   
   // 添加导入按钮点击事件
-  card.querySelector('.import-prompt-btn')?.addEventListener('click', (e) => {
+  card.querySelector('.use-prompt-btn')?.addEventListener('click', (e) => {
     const promptId = (e.currentTarget as HTMLElement).getAttribute('data-prompt-id');
     if (promptId) {
-      importPrompt(promptId);
+      const promptToUse = mockPrompts.find(p => p.id === promptId);
+      if (promptToUse) {
+        insertPromptToInput(promptToUse.content);
+      }
+    }
+  });
+  
+  // 添加更多选项点击事件
+  card.querySelector('.more-options-btn')?.addEventListener('click', (e) => {
+    const optionsMenu = (e.currentTarget as HTMLElement).nextElementSibling;
+    if (optionsMenu) {
+      optionsMenu.classList.toggle('hidden');
+    }
+  });
+  
+  // 添加收藏按钮点击事件
+  card.querySelector('.favorite-prompt-btn')?.addEventListener('click', (e) => {
+    const promptId = (e.currentTarget as HTMLElement).getAttribute('data-prompt-id');
+    if (promptId) {
+      // 切换收藏状态
+      toggleFavoritePrompt(promptId);
+      // 切换填充状态
+      const svg = (e.currentTarget as HTMLElement).querySelector('svg');
+      if (svg) {
+        if (svg.getAttribute('fill') === 'none') {
+          svg.setAttribute('fill', 'currentColor');
+        } else {
+          svg.setAttribute('fill', 'none');
+        }
+      }
     }
   });
   
   return card;
 }
 
-// 导入Prompt
-function importPrompt(promptId: string) {
-  // 实际实现中，这里应该将prompt添加到用户的个人库中
-  console.log(`导入提示 ${promptId}`);
+// 将Prompt插入到聊天输入框
+function insertPromptToInput(promptText: string) {
+  // 查找Gemini的输入框
+  const textarea = document.querySelector('textarea[aria-label="Type something or pick one from prompt gallery"]');
   
-  // 模拟导入成功消息
-  showToast('提示已成功导入到您的个人库');
+  if (textarea) {
+    // 设置值
+    (textarea as HTMLTextAreaElement).value = promptText;
+    
+    // 触发input事件让Angular知道值已经改变
+    const inputEvent = new Event('input', { bubbles: true });
+    textarea.dispatchEvent(inputEvent);
+    
+    // 触发focus事件
+    textarea.dispatchEvent(new Event('focus'));
+    
+    // 让Run按钮变成可点击状态
+    const runButton = document.querySelector('button.run-button');
+    if (runButton && runButton.hasAttribute('disabled')) {
+      runButton.removeAttribute('disabled');
+      runButton.setAttribute('aria-disabled', 'false');
+      runButton.classList.remove('disabled');
+    }
+    
+    // 显示成功消息
+    showToast('Prompt已成功插入到对话框');
+  } else {
+    // 尝试查找其他可能的输入框（ChatGPT等）
+    const otherTextarea = document.querySelector('textarea');
+    if (otherTextarea) {
+      (otherTextarea as HTMLTextAreaElement).value = promptText;
+      otherTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+      otherTextarea.dispatchEvent(new Event('focus'));
+      showToast('Prompt已成功插入到对话框');
+    } else {
+      showToast('无法找到输入框，请手动复制Prompt');
+      console.error('找不到输入框元素');
+    }
+  }
+}
+
+// 切换收藏状态
+function toggleFavoritePrompt(promptId: string) {
+  console.log(`收藏/取消收藏提示 ${promptId}`);
+  // 实际实现中，这里应该切换prompt在用户收藏库中的状态
+  showToast('收藏状态已更新');
 }
 
 // 显示Toast消息
