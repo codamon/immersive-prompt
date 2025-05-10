@@ -152,15 +152,15 @@
     </div>
   </div>
 
-  <!-- 引入Mock适配器，确保在非Chrome环境中也能运行 -->
+  <!-- 使用Vite的模块加载方式 -->
   <script type="module">
-    // 必须先导入Mock适配器
-    import enableMockChromeStorage from '../storage/mockChromeStorage.js';
-    enableMockChromeStorage();
+    // 直接从相对路径导入文件
+    import enableMockChromeStorage, { clearMockChromeStorage } from '/src/storage/mockChromeStorage.ts';
+    import ChromeStorage from '/src/storage/chromeStorage.ts';
+    import StorageExamples from '/src/storage/storageExample.ts';
     
-    // 然后导入ChromeStorage和示例
-    import ChromeStorage from '../storage/chromeStorage.js';
-    import StorageExamples from '../storage/storageExample.js';
+    // 启用模拟存储
+    enableMockChromeStorage();
     
     // 辅助函数：格式化输出
     function formatOutput(data) {

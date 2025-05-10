@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immersive Prompt 预览</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+        .preview-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .preview-button {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+        }
+        .preview-marketplace {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            display: none;
+        }
+        .preview-marketplace.dark {
+            background: #1e1e2e;
+            color: #e4e6eb;
+        }
+        .preview-marketplace.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <!-- 模拟的聊天界面 -->
+        <div class="p-4">
+            <textarea class="w-full p-4 border rounded-lg" rows="4" placeholder="Type something or pick one from prompt gallery"></textarea>
+        </div>
+
+        <!-- 预览按钮 -->
+        <div class="preview-button">
+            <button id="preview-toggle" class="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                    <path d="M12 3v18"></path>
+                    <path d="M3 12h18"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 预览市场界面 -->
+        <div id="preview-marketplace" class="preview-marketplace">
+            <!-- 市场界面内容将通过 JavaScript 动态插入 -->
+        </div>
+    </div>
+
+    <script>
+        // 模拟的提示数据
+        const mockPrompts = [
+            {
+                id: "1",
+                title: "高级SEO内容创作器",
+                content: "为{{topic}}写一篇针对关键词{{keyword}}的SEO优化博客文章。包括引言、至少3个小标题和结论。",
+                description: "创建具有适当结构的SEO友好博客内容",
+                tags: ["写作", "seo", "博客"],
+                language: "en",
+                category: "Content Creation",
+                author: "seomaster",
+                rating: 4.8,
+                downloads: 1250,
+                createdAt: new Date(2023, 3, 15)
+            },
+            {
+                id: "2",
+                title: "代码审查助手专业版",
+                content: "请帮我审查以下{{language}}代码，找出潜在的bug、性能问题和安全漏洞：\n\n```{{language}}\n{{code}}\n```",
+                description: "帮助审查代码，发现潜在问题，提供专业建议",
+                tags: ["编程", "审查", "安全"],
+                language: "zh",
+                category: "Development",
+                author: "codereviewer",
+                rating: 4.9,
+                downloads: 3200,
+                createdAt: new Date(2023, 2, 10)
+            }
+        ];
+
+        // 切换首页显示
+        function toggleHomePage() {
+            const marketplace = document.getElementById('preview-marketplace');
+            if (!marketplace.classList.contains('show')) {
+                marketplace.classList.add('show');
+                createHomePageUI();
+            } else {
+                marketplace.classList.remove('show');
+            }
+        }
+
+        // 创建首页界面
+        function createHomePageUI() {
+            const marketplace = document.getElementById('preview-marketplace');
+            marketplace.innerHTML = `
+                <header class="p-4 border-b flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-xl font-bold">Immersive Prompt</h1>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="marketplace-link" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="浏览更多提示">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </button>
+                        <button id="save-button" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="保存">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                        </button>
+                        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="切换主题">
+                            <span id="theme-toggle-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <button id="settings-button" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="设置">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+                
+                <div class="p-4 space-y-4">
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                        </svg>
+                        <input id="prompt-search" type="text" placeholder="搜索提示..." class="search-input w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
+                    </div>
+                    
+                    <div class="flex border-b border-gray-200 dark:border-gray-700">
+                        <button id="tab-all" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2 active-tab">全部</button>
+                        <button id="tab-favorites" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2">收藏</button>
+                        <button id="tab-recent" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2">最近</button>
+                        <button id="tab-popular" class="tab-button flex-1 py-2 px-1 text-sm font-medium border-b-2">热门</button>
+                    </div>
+                </div>
+                
+                <div id="prompts-container" class="flex-1 overflow-y-auto p-4">
+                    <div id="prompts-grid" class="grid grid-cols-1 gap-4">
+                        <!-- 提示卡片将在这里动态插入 -->
+                    </div>
+                </div>
+            `;
+
+            // 渲染提示卡片
+            const promptsGrid = document.getElementById('prompts-grid');
+            mockPrompts.forEach(prompt => {
+                const card = createPromptCard(prompt);
+                promptsGrid.appendChild(card);
+            });
+        }
+
+        // 创建提示卡片
+        function createPromptCard(prompt) {
+            const card = document.createElement('div');
+            card.className = 'w-full border rounded-lg shadow-sm overflow-hidden prompt-card flex flex-col';
+            
+            card.innerHTML = `
+                <div class="p-4">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-base font-medium">${prompt.title}</h3>
+                        <div class="flex items-center gap-2">
+                            <button class="favorite-prompt-btn p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" data-prompt-id="${prompt.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2 flex flex-wrap gap-1">
+                        ${prompt.tags.map(tag => `<span class="px-2 py-0.5 text-xs border tag-item rounded-full">${tag}</span>`).join('')}
+                    </div>
+                    
+                    <p class="mt-3 text-sm prompt-description">${prompt.description}</p>
+                    
+                    <div class="mt-4 flex justify-between items-center">
+                        <div class="text-xs text-gray-500">
+                            <span class="font-medium">@${prompt.author}</span> · ${prompt.createdAt.toLocaleDateString()}
+                        </div>
+                        <button class="use-prompt-btn px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center gap-1" data-prompt-id="${prompt.id}">
+                            Use
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // 初始化
+        document.getElementById('preview-toggle').addEventListener('click', toggleHomePage);
+
+        // 浏览更多提示按钮点击事件
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#marketplace-link')) {
+                const marketplace = document.getElementById('preview-marketplace');
+                if (!marketplace.classList.contains('show')) {
+                    marketplace.classList.add('show');
+                    createMarketplaceUI();
+                }
+            }
+        });
+
+        // 主题切换
+        let isDarkMode = false;
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#theme-toggle')) {
+                isDarkMode = !isDarkMode;
+                const marketplace = document.getElementById('preview-marketplace');
+                if (isDarkMode) {
+                    marketplace.classList.add('dark');
+                } else {
+                    marketplace.classList.remove('dark');
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

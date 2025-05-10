@@ -20,7 +20,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    // --- ADD THIS LINE ---
+    "types": ["chrome", "node"] // Added "chrome", "node" is good to keep if you use Node.js types
+    // --- OR IF "types" ALREADY EXISTS, ADD "chrome" TO IT ---
+    // "types": ["vite/client", "chrome", "node"] // Example if vite/client was already there
   },
   "include": ["src"]
 }
