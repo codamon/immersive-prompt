@@ -1,54 +1,87 @@
-# React + TypeScript + Vite
+# AI 对话助手 Pro (AI Chat Helper Pro)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个提升用户在各种AI聊天平台（如ChatGPT、Claude、Gemini等）交互效率的Chrome扩展程序。
 
-Currently, two official plugins are available:
+## 🌟 核心功能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **快速插入Prompt**: 在AI聊天界面一键插入预设的高质量提示词
+- **多语言支持**: 界面和Prompt支持多语言（中文、英文等）
+- **本地/远程存储**: 将您的Prompt保存在本地或云端，随时随地访问
+- **Prompt市场**: 浏览、下载社区分享的热门Prompt
+- **模板系统**: 使用变量创建动态Prompt模板，提高复用性
+- **无缝集成**: 与主流AI对话平台（ChatGPT、Claude、Gemini等）无缝集成
 
-## Expanding the ESLint configuration
+## 📦 安装方法
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 开发版本
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+1. 克隆仓库
+   ```bash
+   git clone https://github.com/yourusername/immersive-prompt.git
+   cd immersive-prompt
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. 安装依赖
+   ```bash
+   yarn install
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. 构建扩展
+   ```bash
+   yarn build
+   ```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+4. 在Chrome中加载扩展
+   - 打开 `chrome://extensions/`
+   - 开启"开发者模式"
+   - 点击"加载已解压的扩展程序"
+   - 选择项目中的 `dist` 文件夹
+
+### 从Chrome商店安装
+*(即将推出)*
+
+## 🚀 使用方法
+
+1. **访问AI聊天网站**：打开支持的AI聊天网站（如ChatGPT、Claude、Gemini等）
+
+2. **打开插件界面**：点击聊天界面右下角的浮动按钮打开主界面
+
+3. **浏览和使用Prompt**：
+   - 从不同分类中浏览Prompt
+   - 点击"Use"将Prompt直接插入到聊天输入框
+   - 使用搜索框快速查找特定Prompt
+
+4. **创建新Prompt**：
+   - 点击"添加新提示"按钮
+   - 填写标题、内容、描述等信息
+   - 支持使用`{{变量名}}`语法创建模板变量
+
+5. **管理您的Prompt**：
+   - 收藏常用Prompt
+   - 编辑或删除已有Prompt
+   - 导入/导出Prompt数据
+
+## 🔧 技术栈
+
+- TypeScript
+- React
+- Chrome Extensions API
+- Tailwind CSS
+
+## 🤝 贡献指南
+
+欢迎提交问题和功能请求！如果您想贡献代码，请遵循以下步骤：
+
+1. Fork本仓库
+2. 创建您的特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交您的更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 打开Pull Request
+
+## 📄 许可证
+
+本项目采用MIT许可证 - 详情请查看LICENSE文件
+
+---
+
+**AI对话助手Pro** - 让AI对话更高效、更智能、更个性化！
