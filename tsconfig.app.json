@@ -9,10 +9,10 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "noEmit": false,
+    "composite": true,
     "jsx": "react-jsx",
 
     /* Linting */
@@ -22,10 +22,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    // --- ADD THIS LINE ---
-    "types": ["chrome", "node"] // Added "chrome", "node" is good to keep if you use Node.js types
-    // --- OR IF "types" ALREADY EXISTS, ADD "chrome" TO IT ---
-    // "types": ["vite/client", "chrome", "node"] // Example if vite/client was already there
+    "types": ["chrome", "node"]
   },
   "include": ["src"]
 }

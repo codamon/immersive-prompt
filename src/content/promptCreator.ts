@@ -1,7 +1,7 @@
 import type { MarketplacePrompt } from '../types/prompt';
 import { showToast } from './utils';
 
-// togglePromptView函数的类型定义
+// 定义函数类型，用于切换视图
 type TogglePromptViewFunction = (view: 'home' | 'promptForm', promptToEdit?: MarketplacePrompt) => void;
 
 // 保存对togglePromptView函数的引用
@@ -44,7 +44,7 @@ export function handlePromptSaved(promptId: string) {
 }
 
 // 刷新Prompt列表
-function refreshPromptList(promptId?: string) {
+export function refreshPromptList(promptId?: string) {
   // 获取当前活动标签
   const activeTabElement = document.querySelector('.tab-button.font-semibold');
   let currentTab = 'popular';

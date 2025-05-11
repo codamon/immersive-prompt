@@ -1,8 +1,7 @@
 import type { MarketplacePrompt } from '../types/prompt';
 import ChromeStorage from '../storage/chromeStorage';
-import { createPromptView } from './promptFormView'; // 假设 promptFormView.ts 在同级目录
 import { showToast as utilShowToast } from './utils'; // 假设 utils.ts 在同级目录
-import { handlePromptSaved, initPromptCreator, createOrEditPrompt } from './promptCreator'; // 导入新创建的模块
+import { initPromptCreator, createOrEditPrompt } from './promptCreator'; // 导入新创建的模块
 
 // Variable to store original styles
 let originalStyles: {
@@ -39,6 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
 if (document.readyState === 'interactive' || document.readyState === 'complete') {
   initializeUI();
 }
+
+// 监听toggle-prompt-view事件，用于从adapter.ts切换视图
+document.addEventListener('toggle-prompt-view', ((event: CustomEvent) => {
+  const { view, promptToEdit } = event.detail;
+  if (view) {
+    togglePromptView(view, promptToEdit);
+  }
+}) as EventListener);
 
 // 初始化UI
 function initializeUI() {
@@ -569,17 +576,31 @@ export function togglePromptView(view: 'home' | 'promptForm', promptToEdit?: Mar
   if (view === 'promptForm') {
     if (mainContentArea) mainContentArea.style.display = 'none';
     
-    const promptFormViewElement = createPromptView(isDarkMode, (action, promptId) => {
-      console.log(`ImmersivePrompt: Form action: ${action}, Prompt ID: ${promptId}`);
-      togglePromptView('home'); 
-      if (action === 'saved' && promptId) {
-        handlePromptSaved(promptId);
-      }
-    }, promptToEdit);
-
+    // 使用PromptFormView组件替代旧的createPromptView
+    const promptFormContainer = document.createElement('div');
+    promptFormContainer.id = 'prompt-form-view-container';
+    
+    // 创建一个简单的表单视图，后续可以通过React渲染替换
+    promptFormContainer.innerHTML = `
+      <div class="p-4 ${isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}">
+        <h3 class="text-lg font-medium mb-4">${promptToEdit ? '编辑' : '创建新'} Prompt</h3>
+        <p class="text-sm mb-4">请使用React组件版本的PromptFormView</p>
+      </div>
+    `;
+    
     const header = homePageContainer.querySelector('header');
-    header?.insertAdjacentElement('afterend', promptFormViewElement);
+    header?.insertAdjacentElement('afterend', promptFormContainer);
     updateHeaderForViewChange(true, !!promptToEdit);
+    
+    // 触发React组件渲染 - 这里仅占位，实际需要通过React渲染机制
+    if (chrome.runtime) {
+      chrome.runtime.sendMessage({ 
+        action: "renderPromptForm", 
+        targetElementId: 'prompt-form-view-container',
+        isEditing: !!promptToEdit,
+        promptData: promptToEdit
+      });
+    }
   } else { // view === 'home'
     if (mainContentArea) mainContentArea.style.display = 'block';
     updateHeaderForViewChange(false);
