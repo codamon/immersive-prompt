@@ -1,54 +1,89 @@
-# React + TypeScript + Vite
+# Immersive Prompt
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+*Read this in other languages: [简体中文](./docs/i18n/README.zh_CN.md)*
 
-Currently, two official plugins are available:
+A Chrome extension that enhances user interaction efficiency on various AI chat platforms (such as ChatGPT, Claude, Gemini, etc.).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌟 Core Features
 
-## Expanding the ESLint configuration
+- **Quick Prompt Insertion**: Insert high-quality prompts into AI chat interfaces with one click
+- **Multi-language Support**: Interface and prompts available in multiple languages (English, Chinese, etc.)
+- **Local/Remote Storage**: Save your prompts locally or in the cloud for access anytime, anywhere
+- **Prompt Marketplace**: Browse and download popular prompts shared by the community
+- **Template System**: Create dynamic prompt templates using variables for better reusability
+- **Seamless Integration**: Integrates seamlessly with mainstream AI conversation platforms (ChatGPT, Claude, Gemini, etc.)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📦 Installation
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Development Version
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/immersive-prompt.git
+   cd immersive-prompt
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2. Install dependencies
+   ```bash
+   yarn install
+   ```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+3. Build the extension
+   ```bash
+   yarn build
+   ```
+
+4. Load the extension in Chrome
+   - Open `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist` folder in the project
+
+### Install from Chrome Web Store
+*(Coming soon)*
+
+## 🚀 Usage
+
+1. **Visit AI Chat Websites**: Open supported AI chat websites (such as ChatGPT, Claude, Gemini, etc.)
+
+2. **Open the Plugin Interface**: Click the floating button in the bottom right corner of the chat interface to open the main interface
+
+3. **Browse and Use Prompts**:
+   - Browse prompts from different categories
+   - Click "Use" to directly insert a prompt into the chat input box
+   - Use the search box to quickly find specific prompts
+
+4. **Create New Prompts**:
+   - Click the "Add New Prompt" button
+   - Fill in title, content, description, and other information
+   - Support for creating template variables using the `{{variable_name}}` syntax
+
+5. **Manage Your Prompts**:
+   - Favorite commonly used prompts
+   - Edit or delete existing prompts
+   - Import/export prompt data
+
+## 🔧 Technology Stack
+
+- TypeScript
+- React
+- Chrome Extensions API
+- Tailwind CSS
+
+## 🤝 Contribution Guidelines
+
+Issues and feature requests are welcome! If you want to contribute code, please follow these steps:
+
+1. Fork this repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details
+
+---
+
+**Immersive Prompt** - Make AI conversations more efficient, smarter, and personalized!
