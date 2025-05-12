@@ -313,6 +313,18 @@ function addThemeStyles() {
       border-color: #dee2e6;
     }
     
+    /* Tab按钮样式 - 明亮模式 */
+    #ai-prompt-marketplace.light-theme .tab-button {
+      color: #666666;
+      border-color: transparent;
+      transition: all 0.2s ease;
+    }
+    #ai-prompt-marketplace.light-theme .tab-button.active-tab {
+      color: #2563eb;
+      border-color: #2563eb;
+      font-weight: 600;
+    }
+    
     /* 卡片明亮模式 */
     #ai-prompt-marketplace.light-theme .prompt-card {
       background-color: #ffffff;
@@ -361,6 +373,18 @@ function addThemeStyles() {
       color: #cdd0e3;
     }
     
+    /* Tab按钮样式 - 暗黑模式 */
+    #ai-prompt-marketplace.dark-theme .tab-button {
+      color: #a9adc1;
+      border-color: transparent;
+      transition: all 0.2s ease;
+    }
+    #ai-prompt-marketplace.dark-theme .tab-button.active-tab {
+      color: #60a5fa;
+      border-color: #60a5fa;
+      font-weight: 600;
+    }
+    
     /* 卡片暗黑模式 */
     #ai-prompt-marketplace.dark-theme .prompt-card {
       background-color: #252836;
@@ -386,6 +410,14 @@ function addThemeStyles() {
     }
     .prompt-card:hover {
       transform: translateY(-2px);
+    }
+    
+    /* 标签按钮悬停效果 */
+    .tab-button:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    .dark-theme .tab-button:hover {
+      background-color: rgba(255, 255, 255, 0.05);
     }
   `;
   document.head.appendChild(styleElement);
