@@ -1,6 +1,6 @@
 # Immersive Prompt
 
-*Read this in other languages: [简体中文](./docs/i18n/README.zh_CN.md)*
+*Read this in other languages: [简体中文](./docs/i18n/README.zh_CN.md), [日本語](./docs/i18n/README.ja_JP.md)*
 
 A Chrome extension that enhances user interaction efficiency on various AI chat platforms (such as ChatGPT, Claude, Gemini, etc.).
 
