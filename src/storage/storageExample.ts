@@ -3,7 +3,7 @@
  * 本文件展示了如何使用 ChromeStorage 类进行常见操作
  */
 
-import ChromeStorage, { Prompt, Folder } from './chromeStorage';
+import ChromeStorage from './chromeStorage';
 
 /**
  * 示例1: 添加新提示

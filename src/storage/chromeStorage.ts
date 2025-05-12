@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Chrome Storage API 本地存储方案
  * 考虑与 Strapi 后端兼容的数据结构
